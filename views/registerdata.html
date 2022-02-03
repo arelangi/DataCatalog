@@ -2,154 +2,241 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Data Catalog Registration</title>
-  <meta name="description" content="Register new data sets">
-  <!-- Pico.css -->
-  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Data Catalog Registration</title>
+    <meta name="description" content="Register new data sets">
+    <!-- Pico.css -->
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+
+    <!--Jquery -->
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"> </script>
+    <script>
+
+        $(document).ready(function () {
+            $('#metadataform').submit(function (event) {
+
+                $.ajax({
+                    url: '/registerMetadata',
+                    dataType: 'json',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        "dataset_name": $('#Dataset_Name').val(),
+                        "dataset_logical_name": $('#Dataset_Logical_Name').val(),
+                        "dataset_description": $('#Dataset_Description').val(),
+                        "dataset_type": $('#Dataset_Type').val(),
+                        "dataset_source": $('#Dataset_Source').val(),
+                        "dataset_share": $('#Dataset_Share').val(),
+                        "dataset_retention": parseInt($('#Dataset_Retention').val()),
+                        "dataset_retention_justification": $('#Dataset_Retention_Justification').val(),
+                        "dataset_arrival_frequency": $('#Dataset_Arrival_Frequency').val(),
+                        "organization": $('Organization').val(),
+                        "product": $('Product').val(),
+                        "team": $('Team').val(),
+                        "data_steward": $('Data_Steward').val(),
+                        "platform_name":  $('#PlatformName').val(),
+                        "host_name":  $('#HostName    ').val(),
+                        "database_name":  $('#DatabaseName').val(),
+                        "schema_name":  $('#SchemaName  ').val(),
+                        "data_classification": $('#DataClassiffication').val(),
+                    }),
+                    processData: false,
+                    success: function (data, textStatus, jQxhr) {
+                        //$('#response pre').html( JSON.stringify( data ) );
+                        console.log(data);
+                    },
+                    error: function (jqXhr, textStatus, errorThrown) {
+                        console.log(errorThrown);
+                    }
+                });
+
+                event.preventDefault();
+            });
+
+
+            $('#lineageform').submit(function(event){
+                
+                alert("button pressed");
+
+                $.ajax({
+                    url: '/registerLineage', 
+                    dataType: 'json',
+                    type: 'POST', 
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        "derived_from": $('#DerivedFrom').val(),
+                        "dataset_id": parseInt($("#DatasetID").val()),
+                    }),
+                    processData:false,
+                    success: function(data,textStatus,jQxhr){
+                        console.log(data);
+                    },
+                    error: function(jqXhr, textStatus, errorThrown){
+                        console.log(errorThrown);
+                    }
+                });
+
+                event.preventDefault();
+            });
+
+        });
+
+
+
+
+    </script>
 </head>
 
 <body>
 
-  <!-- Header -->
-  <header class="container">
-    <hgroup>
-      <h1>Data Registration</h1>
-      <h2>Register your data here!</h2>
-    </hgroup>
-  </header><!-- ./ Header -->
+    <!-- Header -->
+    <header class="container">
+        <hgroup>
+            <h1>Data Registration</h1>
+            <h2>Register your data here!</h2>
+        </hgroup>
+    </header><!-- ./ Header -->
 
-  <!-- Main -->
-  <main class="container">
+    <!-- Main -->
+    <main class="container">
 
-    <!-- Accordions -->
-    <section id="accordions">
-      <h2>Metadata</h2>
-      <details>
-        <summary>Basic Information</summary>
-        <div id="metadata_section">
-          <br /><br />
-          <form>
-            <input type="text" name="Dataset_Name" placeholder="Dataset Name" aria-label="Dataset Name" required>
-            <input type="text" name="Dataset_Logical_Name" placeholder="Dataset LogicalName"
-              aria-label="Dataset LogicalName" required>
-            <input type="text" name="Dataset_Description" placeholder="Dataset Description"
-              aria-label="Dataset Description" required>
-            <label>Dataset Type</label>
-            <select id="Dataset_Type" name="Dataset_Type" required>
-              <option value="Physical Table">Physical Table</option>
-              <option value="Logical View">View</option>
-              <option value="File">File</option>
-            </select>
-            <label>Is data sourced externally?</label>
-            <select id="Dataset_Source" name="Dataset_Source" required>
-              <option value="yes">Yes</option>
-              <option value="No" selected>No</option>
-            </select>
-            <label>Is data shared externally?</label>
-            <select id="Dataset_Share" name="Dataset_Share" required>
-              <option value="yes">Yes</option>
-              <option value="No" selected>No</option>
-            </select>
+        <!-- Accordions -->
+        <section id="accordions">
+            <h2>Metadata</h2>
+            <details>
+                <summary>Basic Information</summary>
+                <div id="metadata_section">
+                    <br /><br />
+                    <form id="metadataform">
+                        <input type="text" id="Dataset_Name" name="Dataset_Name" placeholder="Dataset Name"
+                            aria-label="Dataset Name" required>
+                        <input type="text" id="Dataset_Logical_Name" name="Dataset_Logical_Name"
+                            placeholder="Dataset LogicalName" aria-label="Dataset LogicalName" required>
+                        <input type="text" id="Dataset_Description" name="Dataset_Description"
+                            placeholder="Dataset Description" aria-label="Dataset Description" required>
+                        <label>Dataset Type</label>
+                        <select id="Dataset_Type" name="Dataset_Type" required>
+                            <option value="Physical Table">Physical Table</option>
+                            <option value="Logical View">View</option>
+                            <option value="File">File</option>
+                        </select>
+                        <label>Is data sourced externally?</label>
+                        <select id="Dataset_Source" name="Dataset_Source" required>
+                            <option value="true">Yes</option>
+                            <option value="false" selected>No</option>
+                        </select>
+                        <label>Is data shared externally?</label>
+                        <select id="Dataset_Share" name="Dataset_Share" required>
+                            <option value="true">Yes</option>
+                            <option value="false" selected>No</option>
+                        </select>
 
-            <input type="text" name="Dataset_Retention" placeholder="Dataset Retention in days(-1 for indefinite)"
-              aria-label="Dataset Retention" required>
-            <input type="text" name="Dataset_Retention_Justification"
-              placeholder="Dataset retention set accoding to data governance policy established in xyz"
-              aria-label="Dataset Retention Justification" required>
-            <label>Data Arrival Frequency</label>
-            <select id="Dataset_Arrival_Frequency" name="Dataset_ArrivalFrequency" required>
-              <option value="sub-second" selected>Sub second</option>
-              <option value="minutes" selected>Minutes</option>
-              <option value="hourly" selected>Hourly</option>
-              <option value="daily" selected>Daily</option>
-              <option value="weekly" selected>Weekly</option>
-              <option value="monthly" selected>Monthly</option>
-            </select>
+                        <input type="number" id="Dataset_Retention" name="Dataset_Retention"
+                            placeholder="Dataset Retention in days(-1 for indefinite)" aria-label="Dataset Retention"
+                            required>
+                        <input type="text" id="Dataset_Retention_Justification" name="Dataset_Retention_Justification"
+                            placeholder="Dataset retention set accoding to data governance policy established in xyz"
+                            aria-label="Dataset Retention Justification" required>
+                        <label>Data Arrival Frequency</label>
+                        <select id="Dataset_Arrival_Frequency" name="Dataset_ArrivalFrequency" required>
+                            <option value="sub-second" selected>Sub second</option>
+                            <option value="minutes" selected>Minutes</option>
+                            <option value="hourly" selected>Hourly</option>
+                            <option value="daily" selected>Daily</option>
+                            <option value="weekly" selected>Weekly</option>
+                            <option value="monthly" selected>Monthly</option>
+                        </select>
 
-            <br />
-            <hr />
-            <br />
+                        <br />
+                        <hr />
+                        <br />
 
-            <label>Ownership</label>
-            <input type="text" name="Org" placeholder="Org" aria-label="Org" required>
-            <input type="text" name="Product" placeholder="Product" aria-label="Product" required>
-            <input type="text" name="Team" placeholder="Team" aria-label="Team" required>
-            <input type="text" name="Data_Steward" placeholder="Data Steward" aria-label="Data Steward" required>
+                        <label>Ownership</label>
+                        <input type="text" id="Org" name="Org" placeholder="Org" aria-label="Org" required>
+                        <input type="text" id="Product" name="Product" placeholder="Product" aria-label="Product"
+                            required>
+                        <input type="text" id="Team" name="Team" placeholder="Team" aria-label="Team" required>
+                        <input type="text" id="Data_Steward" name="Data_Steward" placeholder="Data Steward"
+                            aria-label="Data Steward" required>
 
-            <br />
-            <hr />
-            <br />
+                        <br />
+                        <hr />
+                        <br />
 
-            <label>Platform</label>
-            <select id="Platform_Name" name="Platform_Name" required>
-              <option value="Kafka">Kafka</option>
-              <option value="Postgres" selected>Postgres</option>
-              <option value="Dynamo">Dynamo</option>
-              <option value="Riak">Riak</option>
-              <option value="Data Lake">Data Lake</option>
-            </select>
-            <input type="text" name="HostName" placeholder="HostName" aria-label="HostName">
-            <input type="text" name="DatabaseName" placeholder="DatabaseName" aria-label="DatabaseName">
-            <input type="text" name="SchemaName" placeholder="SchemaName" aria-label="SchemaName">
+                        <label>Platform</label>
+                        <select id="PlatformName" name="PlatformName" required>
+                            <option value="Kafka">Kafka</option>
+                            <option value="Postgres" selected>Postgres</option>
+                            <option value="Dynamo">Dynamo</option>
+                            <option value="Riak">Riak</option>
+                            <option value="Data Lake">Data Lake</option>
+                        </select>
+                        <input type="text" id="HostName" name="HostName" placeholder="HostName" aria-label="HostName">
+                        <input type="text" id="DatabaseName" name="DatabaseName" placeholder="DatabaseName"
+                            aria-label="DatabaseName">
+                        <input type="text" id="SchemaName" name="SchemaName" placeholder="SchemaName"
+                            aria-label="SchemaName">
 
-            <label>Security & Privacy</label>
-            <select id="DataClassiffication" name="Data_Classification" required>
-              <option value="Anon">Anon</option>
-              <option value="NPI">NPI</option>
-              <option value="PCI">PCI</option>
-              <option value="Credit">Credit</option>
-            </select>
-
-
-            <input id="metadata-submit" type="submit" value="Submit" onclick="event.preventDefault()">
-          </form>
-        </div>
+                        <label>Security & Privacy</label>
+                        <select id="DataClassiffication" name="Data_Classification" required>
+                            <option value="Anon">Anon</option>
+                            <option value="NPI">NPI</option>
+                            <option value="PCI">PCI</option>
+                            <option value="Credit">Credit</option>
+                        </select>
 
 
-      </details>
-      <details>
-        <summary>Schema</summary>
-        <div id="schema">
-          <br /><br />
-          <form>
-            <label for="file">Upload your Protobuf/Avro Schema
-              <input type="file" id="file" name="file">
-            </label>
+                        <button id="metdata-btn">Submit</button>
+                    </form>
+                </div>
 
-            <input id="schema-submit" type="submit" value="Submit" onclick="event.preventDefault()">
-          </form>
 
-        </div>
+            </details>
+            <details>
+                <summary>Schema</summary>
+                <div id="schema">
+                    <br /><br />
+                    <form id="schemaform">
+                        <label for="file">Upload your Protobuf/Avro Schema
+                            <input type="file" id="file" name="file">
+                        </label>
 
-      </details>
-      <details>
-        <summary>Lineage</summary>
-        <div id="lineage">
-          <br /><br />
-          Lorem Ipsum
+                        <input id="schema-submit" type="submit" value="Submit" onclick="event.preventDefault()">
+                    </form>
 
-        </div>
+                </div>
 
-      </details>
-      <details>
-        <summary>Data Quality Rules</summary>
-        <div id="dataquality">
-          <br /><br />
-            Lorem Ipsum
+            </details>
+            <details>
+                <summary>Lineage</summary>
+                <div id="lineage">
+                    <form id="lineageform">
+                        <input type="text" id="DerivedFrom" name="DerivedFrom" placeholder="Derived From" aria-label="Derived From">
+                        <input type="hidden" id="DatasetID" name="DatasetID" placeholder="DatasetID" aria-label="Dataset ID">
+                        <input id="lineage-submit" type="submit" value="Submit" >
+                    </form>
 
-        </div>
+                </div>
 
-      </details>
-    </section><!-- ./ Accordions -->
+            </details>
+            <details>
+                <summary>Data Quality Rules</summary>
+                <div id="dataquality">
+                    <br /><br />
+                    Lorem Ipsum
 
-  </main><!-- ./ Main -->
+                </div>
 
-  <!-- Footer -->
-  <footer class="container">
-    <small></small><a href="#">Data Catalog</a> • <a href="#">Zendesk</a></small>
-  </footer><!-- ./ Footer -->
+            </details>
+        </section><!-- ./ Accordions -->
+
+    </main><!-- ./ Main -->
+
+    <!-- Footer -->
+    <footer class="container">
+        <small></small><a href="#">Data Catalog</a> • <a href="#">Zendesk</a></small>
+    </footer><!-- ./ Footer -->
 
 
 </body>
