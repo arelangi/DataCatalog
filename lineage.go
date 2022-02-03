@@ -3,13 +3,19 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type Lineage struct {
-	DerivedFrom string `json:"derived_from"`
-	DatasetID   int64  `json:"dataset_id"`
+	DerivedFrom string    `json:"derived_from"`
+	DatasetID   int64     `json:"dataset_id"`
+	DatasetUUID uuid.UUID `json:"dataset_uuid"`
+	//Audit columns
+	CreatedDate     time.Time `json:"-"`
+	LastUpdatedTime time.Time `json:"-"`
 }
 
 func (a *App) registerLineageHandler() gin.HandlerFunc {
@@ -25,6 +31,20 @@ func (a *App) registerLineageHandler() gin.HandlerFunc {
 
 		fmt.Println(lineageRequest)
 
-		c.JSON(http.StatusOK, gin.H{"message": "success"})
+		if err := lineageRequest.createLineageRecord(a); err != nil {
+			errResp.Error = err.Error()
+			errResp.Message = fmt.Sprintf("Failed to create account")
+			c.JSON(http.StatusNotFound, errResp)
+			return
+		}
+		c.JSON(http.StatusOK, lineageRequest)
 	}
+}
+
+func (m *Lineage) createLineageRecord(app *App) (err error) {
+	_, err = app.DB.Exec("INSERT into datacatalog.public.lineage(dataset_id, dataset_uuid, derived_from) VALUES ($1, $2, $3)", m.DatasetID, m.DatasetUUID, m.DerivedFrom)
+
+	_, err = app.DB.Exec("UPDATE datacatalog.public.metadata set metadata_status=$1 where dataset_id=$2", "lineage_applied", m.DatasetID)
+
+	return err
 }
