@@ -46,8 +46,8 @@
                     success: function (data, textStatus, jQxhr) {
                         //$('#response pre').html( JSON.stringify( data ) );
 
-                        $('#dataset_id').val(data['dataset_id']);
-                        $('#dataset_uuid').val(data['dataset_uuid']);
+                        $('.dataset_id').val(data['dataset_id']);
+                        $('.dataset_uuid').val(data['dataset_uuid']);
 
                         var tblHead = '<br/><table id="metadata_table" role="grid"> <thead> <tr> <th scope="col">Attribute</th><th scope="col">Value</th></tr> </thead>';
                         var tblBody = '<tbody>';
@@ -105,7 +105,7 @@
                     contentType: 'application/json',
                     data: JSON.stringify({
                         "derived_from": $('#derived_from').val(),
-                        "dataset_id": parseInt($("#dataset_id").val()),
+                        "dataset_id": parseInt($(".dataset_id").val()),
                     }),
                     processData: false,
                     success: function (data, textStatus, jQxhr) {
@@ -124,9 +124,46 @@
                 event.preventDefault();
             });
 
+
+            $('#schemaform').submit(function (event) {
+                console.log('submitted')
+                $.ajax({
+                    url: '/registerSchema',
+                    type: 'POST',
+                    contentType: false,
+                    data: new FormData(this),
+                    processData: false,
+                    success: function (data, textStatus, jqXHR) {
+                        var content = '<pre>' + JSON.stringify(data, undefined, 4) + '</pre>';
+                        $('#schema_section').html(content);
+                        console.log(data);
+                        meta = data;
+
+                        ajaxCall2(data['fields']);
+
+                    }
+
+                });
+                event.preventDefault();
+
+            });
         });
 
 
+        function ajaxCall2(srcData) {
+
+            var tblHead = '<br/><table id="schema_table" role="grid"> <thead> <tr> <th scope="col">Field Name</th><th scope="col">Type</th><th scope="col">Description</th></tr> </thead>';
+            var tblBody = '<tbody>';
+            var fields = srcData['data']
+            for (let index = 0; index < fields.length; index++) {
+                element = fields[index];
+                eachRow = '<tr><td>' + element["name"] + '</td><td>' + element["type"] + '</td><td>' + element["doc"] + '</td></tr>';
+                tblBody += eachRow;
+            }
+            tblBody += '</tbody></table><br/>';
+            $('#schema_section').html(tblHead + tblBody);
+
+        }
 
 
     </script>
@@ -159,12 +196,6 @@
                             placeholder="Dataset LogicalName" aria-label="Dataset LogicalName" required>
                         <input type="text" id="dataset_description" name="Dataset_Description"
                             placeholder="Dataset Description" aria-label="Dataset Description" required>
-                        <label>Dataset Type</label>
-                        <select id="dataset_type" name="Dataset_Type" required>
-                            <option value="Physical Table">Physical Table</option>
-                            <option value="Logical View">View</option>
-                            <option value="File">File</option>
-                        </select>
                         <label>Is data sourced externally?</label>
                         <select id="dataset_source" name="Dataset_Source" required>
                             <option value="true">Yes</option>
@@ -243,10 +274,14 @@
                     <br /><br />
                     <form id="schemaform">
                         <label for="file">Upload your Protobuf/Avro Schema
-                            <input type="file" id="file" name="file">
+                            <input type="file" id="file" name="file" accept=".avsc,.proto">
                         </label>
+                        <input type="hidden" class="dataset_id" name="DatasetID" placeholder="DatasetID"
+                            aria-label="Dataset ID">
+                        <input type="hidden" class="dataset_uuid" name="DatasetUUID" placeholder="DatasetUUID"
+                            aria-label="Dataset UUID">
 
-                        <input id="schema-submit" type="submit" value="Submit" onclick="event.preventDefault()">
+                        <input id="schema-submit" type="submit" value="Submit">
                     </form>
 
                 </div>
@@ -258,9 +293,9 @@
                     <form id="lineageform">
                         <input type="text" id="derived_from" name="DerivedFrom" placeholder="Derived From"
                             aria-label="Derived From">
-                        <input type="hidden" id="dataset_id" name="DatasetID" placeholder="DatasetID"
+                        <input type="hidden" class="dataset_id" name="DatasetID" placeholder="DatasetID"
                             aria-label="Dataset ID">
-                        <input type="hidden" id="dataset_uuid" name="DatasetUUID" placeholder="DatasetUUID"
+                        <input type="hidden" class="dataset_uuid" name="DatasetUUID" placeholder="DatasetUUID"
                             aria-label="Dataset UUID">
                         <input id="lineage-submit" type="submit" value="Submit">
                     </form>
@@ -277,6 +312,24 @@
                 </div>
 
             </details>
+
+            <details>
+                <summary>Configure Sinks</summary>
+                <div id="additionalsinks">
+                    <form id="additionalsinksform">
+                        <label>Dataset Type</label>
+                        <select  id="dataset_type" name="Dataset_Type" required>
+                            <option value="Physical Table">Physical Table</option>
+                            <option value="Logical View">View</option>
+                            <option value="File">File</option>
+                           </select>
+                    </form>
+                </div>
+
+            </details>
+
+            
+
         </section><!-- ./ Accordions -->
 
     </main><!-- ./ Main -->

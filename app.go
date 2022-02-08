@@ -56,5 +56,6 @@ func (a *App) initializeRoutes() {
 	//API Calls
 	a.Engine.POST("/registerMetadata", a.registerMetadataHandler())
 	a.Engine.POST("/registerLineage", a.registerLineageHandler())
+	a.Engine.POST("/registerSchema", a.registerSchemaHandler())
 
 }
