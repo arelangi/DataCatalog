@@ -18,10 +18,13 @@
             $('#metadataform').submit(function (event) {
 
                 $.ajax({
-                    url: '/registerMetadata',
+                    url: '/register/metadata',
                     dataType: 'json',
                     type: 'POST',
                     contentType: 'application/json',
+                    accept: {
+                        json: 'application/json'
+                    },
                     data: JSON.stringify({
                         "dataset_name": $('#dataset_name').val(),
                         "dataset_logical_name": $('#dataset_logical_name').val(),
@@ -58,19 +61,19 @@
                             if (key == "metadata_status") {
                                 switch (data[key]) {
                                     case "inventoried":
-                                        eachRow = '<tr><td>' + key + '</td><td>' + '<button class="secondary">Inventoried</button>' + '</td></tr>';
+                                        eachRow = '<tr><td>' + key + '</td><td id="metadata_status">' + '<button class="secondary">Inventoried</button>' + '</td></tr>';
                                         break;
                                     case "schema_applied":
-                                        eachRow = '<tr><td>' + key + '</td><td>' + '<button class="contrast">Schema Applied</button>' + '</td></tr>';
+                                        eachRow = '<tr><td>' + key + '</td><td id="metadata_status">' + '<button class="contrast">Schema Applied</button>' + '</td></tr>';
                                         break;
                                     case "lineage_applied":
-                                        eachRow = '<tr><td>' + key + '</td><td>' + '<button class="outline">Lineage Applied</button>' + '</td></tr>';
+                                        eachRow = '<tr><td>' + key + '</td><td id="metadata_status">' + '<button class="outline">Lineage Applied</button>' + '</td></tr>';
                                         break;
                                     case "curated":
-                                        eachRow = '<tr><td>' + key + '</td><td>' + '<button class="primary">Curated</button>' + '</td></tr>';
+                                        eachRow = '<tr><td>' + key + '</td><td id="metadata_status">' + '<button class="primary">Curated</button>' + '</td></tr>';
                                         break;
                                     default:
-                                        eachRow = '<tr><td>' + key + '</td><td>' + '<button class="outline contrast">Status Unclear</button>' + '</td></tr>';
+                                        eachRow = '<tr><td>' + key + '</td><td id="metadata_status">' + '<button class="outline contrast">Status Unclear</button>' + '</td></tr>';
                                         break;
                                 }
                             } else {
@@ -97,60 +100,36 @@
             });
 
 
-            $('#lineageform').submit(function (event) {
-                $.ajax({
-                    url: '/registerLineage',
-                    dataType: 'json',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        "derived_from": $('#derived_from').val(),
-                        "dataset_id": parseInt($(".dataset_id").val()),
-                    }),
-                    processData: false,
-                    success: function (data, textStatus, jQxhr) {
-                        var tblHead = '<br/><table id="lineage_table" role="grid"> <thead> <tr> <th scope="col">Attribute</th><th scope="col">Value</th></tr> </thead>';
-                        var tblBody = '<tbody>';
-                        var eachRow = '<tr><td>Derived From</td><td>' + data["derived_from"] + '</td></tr>';
-                        tblBody += eachRow;
-                        tblBody += '</tbody></table><br/>';
-                        $('#lineage_section').html(tblHead + tblBody);
-                        console.log(data);
-                    },
-                    error: function (jqXhr, textStatus, errorThrown) {
-                        console.log(errorThrown);
-                    }
-                });
-                event.preventDefault();
-            });
-
-
             $('#schemaform').submit(function (event) {
                 console.log('submitted')
                 $.ajax({
-                    url: '/registerSchema',
+                    url: '/register/schema',
                     type: 'POST',
                     contentType: false,
                     data: new FormData(this),
                     processData: false,
                     success: function (data, textStatus, jqXHR) {
-                        var content = '<pre>' + JSON.stringify(data, undefined, 4) + '</pre>';
-                        $('#schema_section').html(content);
                         console.log(data);
                         meta = data;
-
-                        ajaxCall2(data['fields']);
-
+                        renderFields(data['fields']);
+                        $('#metadata_status').html('<button class="contrast">Schema Applied</button>');
+                        $('#navigation').html('<p><a href="/register/dataclassification/'+data['dataset_id']+'">Register Data Classification Indicators</a></p>');
                     }
 
                 });
                 event.preventDefault();
 
             });
+
+
+            $('#security-link').click(function(){
+                window.location.href = "/security.html";
+            })
+
         });
 
 
-        function ajaxCall2(srcData) {
+        function renderFields(srcData) {
 
             var tblHead = '<br/><table id="schema_table" role="grid"> <thead> <tr> <th scope="col">Field Name</th><th scope="col">Type</th><th scope="col">Description</th></tr> </thead>';
             var tblBody = '<tbody>';
@@ -287,50 +266,18 @@
                 </div>
 
             </details>
-            <details>
-                <summary>Lineage</summary>
-                <div id="lineage_section">
-                    <form id="lineageform">
-                        <input type="text" id="derived_from" name="DerivedFrom" placeholder="Derived From"
-                            aria-label="Derived From">
-                        <input type="hidden" class="dataset_id" name="DatasetID" placeholder="DatasetID"
-                            aria-label="Dataset ID">
-                        <input type="hidden" class="dataset_uuid" name="DatasetUUID" placeholder="DatasetUUID"
-                            aria-label="Dataset UUID">
-                        <input id="lineage-submit" type="submit" value="Submit">
-                    </form>
-
-                </div>
-
-            </details>
-            <details>
-                <summary>Data Quality Rules</summary>
-                <div id="dataquality">
-                    <br /><br />
-                    Lorem Ipsum
-
-                </div>
-
-            </details>
 
             <details>
-                <summary>Configure Sinks</summary>
-                <div id="additionalsinks">
-                    <form id="additionalsinksform">
-                        <label>Dataset Type</label>
-                        <select  id="dataset_type" name="Dataset_Type" required>
-                            <option value="Physical Table">Physical Table</option>
-                            <option value="Logical View">View</option>
-                            <option value="File">File</option>
-                           </select>
-                    </form>
-                </div>
-
+                <button id="security-link">Security</button>
             </details>
 
             
 
         </section><!-- ./ Accordions -->
+
+        <div class="grid" id="navigation">
+           
+        </div>
 
     </main><!-- ./ Main -->
 

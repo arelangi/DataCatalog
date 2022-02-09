@@ -20,6 +20,7 @@ type SchemaRequest struct {
 }
 
 type SchemaResponse struct {
+	DatasetID         int64               `json:"dataset_id"`
 	SchemaRegistryURL string              `json:"schema_registry_url"`
 	URL               string              `json:"url"`
 	Headers           []string            `json:"headers"`

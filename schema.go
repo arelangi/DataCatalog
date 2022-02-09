@@ -69,6 +69,7 @@ func (a *App) constructRegistryResponseObject(schemaRequest *SchemaRequest, file
 	var fields AvroExtractResponse
 	var failureResponse ErrorResponse
 
+	response.DatasetID = schemaRequest.CatalogDatasetID
 	response.Headers = []string{"--header 'Accept: application/vnd.kafka.v2+json, application/vnd.kafka+json, application/json'", "--header 'Content-Type: application/vnd.kafka.avro.v2+json'"}
 	response.URL = fmt.Sprintf("http://restproxy/9082/topics/%s", schemaRequest.DatasetName)
 	/*http://schemaregistry:8082/subjects/user-value/versions/latest/schema*/
