@@ -10,11 +10,12 @@ type AvroExtractRequest struct {
 }
 
 type SchemaRequest struct {
-	CatalogDatasetID   int64  `json:"catalog_dataset_id"`
-	CatalogDatasetUUID int64  `json:"catalog_dataset_uuid"`
-	SchemaBody         string `json:"schema_body"`
-	SchemaType         string `json:"schema_type"`
-	DatasetName        string `json:"dataset_name"`
+	CatalogDatasetID   int64               `json:"catalog_dataset_id"`
+	CatalogDatasetUUID int64               `json:"catalog_dataset_uuid"`
+	SchemaBody         string              `json:"schema_body"`
+	SchemaType         string              `json:"schema_type"`
+	DatasetName        string              `json:"dataset_name"`
+	Avro               AvroExtractResponse `json:"avro"`
 
 	KafkaRegistryID int64 `json:"kafka_registry_id"`
 }

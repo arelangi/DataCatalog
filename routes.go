@@ -26,7 +26,7 @@ func (a *App) initializeRoutes() {
 		//Page rendering
 		//Render the register page
 		registerRoutes.GET("/start", a.showRegisterPage())
-		registerRoutes.GET("/dataclassification", a.showDataClassificationPage())
+		registerRoutes.GET("/dataclassification/:dataset_id", a.showDataClassificationPage())
 
 		//API Calls
 

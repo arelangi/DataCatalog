@@ -47,6 +47,9 @@ func (a *App) registerSchemaHandler() gin.HandlerFunc {
 		}
 		schemaRequest.SchemaBody = string(body)
 
+		//Construct the response
+		response := a.constructRegistryResponseObject(&schemaRequest, body)
+
 		//Register the schema
 		err = a.registerSchema(&schemaRequest)
 		if err != nil {
@@ -56,8 +59,6 @@ func (a *App) registerSchemaHandler() gin.HandlerFunc {
 			return
 		}
 
-		//Construct the response
-		response := a.constructRegistryResponseObject(&schemaRequest, body)
 		//Generate and return the success response and the URL at which to publish the data to go to Kafka
 		c.JSON(http.StatusOK, response)
 	}
@@ -87,6 +88,7 @@ func (a *App) constructRegistryResponseObject(schemaRequest *SchemaRequest, file
 		log.Println("Failed to extract schema from the avro file ")
 	}
 	response.Fields = fields
+	schemaRequest.Avro = response.Fields
 	return
 }
 
@@ -140,6 +142,13 @@ func (a *App) saveSchemaReferenceToDB(schemaRequest *SchemaRequest, status strin
 	_, err = tx.Exec("insert into datacatalog.public.schemaregistrymapping(kafka_registry_schema_id, dataset_id) VALUES($1, $2) on conflict do nothing", schemaRequest.KafkaRegistryID, schemaRequest.CatalogDatasetID)
 	if err != nil {
 		return err
+	}
+
+	for k, v := range schemaRequest.Avro.Fields {
+		_, err = tx.Exec("insert into datacatalog.public.fields(dataset_id, field_id, name, description, types) VALUES($1, $2, $3, $4, $5) on conflict do nothing", schemaRequest.CatalogDatasetID, k, v.Name, v.Doc, v.Type)
+		if err != nil {
+			return err
+		}
 	}
 
 	//Update the metadata tier status in the metadata table
