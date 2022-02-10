@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Data Catalog Registration</title>
+    <meta name="description" content="Register new data sets">
+    <!-- Pico.css -->
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+
+    <!--Jquery -->
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"> </script>
+    <script>
+        var meta = 5;
+        $(document).ready(function () {
+            $('#approval-submit').on( 'click', function(event) {
+
+                
+                $.ajax({
+                    url: '/ds/approval/{{ .payload.DatasetID }}',
+                    dataType: 'json',
+                    type: 'GET',
+                    contentType: 'application/json',
+                    accept: {
+                        json: 'application/json'
+                    },
+                    success: function (data, textStatus, jQxhr) {
+                        alert('Approved');
+                    },
+                    failure: function(){
+                        alert('Failed');
+                    }
+                });
+                event.preventDefault();
+            });
+        });
+
+    </script>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="container">
+        <hgroup>
+            <h1>Data Registration</h1>
+            <h2>Data Steward Approval!</h2>
+        </hgroup>
+    </header><!-- ./ Header -->
+
+    <!-- Main -->
+    <main class="container">
+
+        <!-- Accordions -->
+        <section id="accordions">
+            <h2>Metadata</h2>
+            <details>
+                <summary>Basic Information</summary>
+                <div id="metadata_section">
+                    <br /><br />
+
+                    <table id="metadata_table" role="grid"> <thead> <tr> <th scope="col">Attribute</th><th scope="col">Value</th></tr> </thead>
+                        <tbody>
+                            <tr><td> Dataset Name </td><td>  {{ .metadata.DatasetName }}  </td></tr>
+                            <tr><td> Logical Name </td><td>  {{ .metadata.DatasetLogicalName }}  </td></tr>
+                            <tr><td> Description </td><td>  {{ .metadata.DatasetDescription }}  </td></tr>
+                            <tr><td> Type </td><td>  {{ .metadata.DatasetType }}  </td></tr>
+                            <tr><td> External Data Source </td><td>  {{ .metadata.DatasetSource }}  </td></tr>
+                            <tr><td> External Data Share </td><td>  {{ .metadata.DatasetShare }}  </td></tr>
+                            <tr><td> Retention Period </td><td>  {{ .metadata.DatasetRetention }}  </td></tr>
+                            <tr><td> Retention Justification </td><td>  {{ .metadata.DatasetRetentionJustification }}  </td></tr>
+                            <tr><td> Arrival Frequency </td><td>  {{ .metadata.DatasetArrivalFrequency }}  </td></tr>
+
+                            <tr><td> Organization </td><td>  {{ .metadata.Organization }}  </td></tr>
+                            <tr><td> Product </td><td>  {{ .metadata.Product }}  </td></tr>
+                            <tr><td> Team </td><td>  {{ .metadata.Team }}  </td></tr>
+                            <tr><td> Data Steward </td><td>  {{ .metadata.DataSteward }}  </td></tr>
+
+                            <tr><td> Platform Name </td><td>  {{ .metadata.PlatformName }}  </td></tr>
+
+                            <tr><td> Classification </td><td>  {{ .metadata.DataClassiffication }} </td></tr>
+
+                            <tr><td> Metadata Status </td><td>  {{ .metadata.MetadataStatus }} </td></tr>
+
+                        </tbody>
+                    </table>
+                </div>
+
+
+            </details>
+            <details>
+                <summary>Schema</summary>
+                <div id="schema_section">
+                    <br /><br />
+                    
+                    <table id="classification_tbl" role="grid">
+                        <form id="dataclassificationform">
+                            <thead>
+                                <tr>
+                                    <th scope="col"> ID</th>
+                                    <th scope="col"> Name</th>
+                                    <th scope="col"> Description</th>
+                                    <th scope="col"> Type </th>
+                                    <th scope="col"> Classification</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {{range .payload.Fields}}
+                            <tr>
+                                <td> 
+                                    {{ .FieldID }}
+                                </td> 
+                                <td> 
+                                    <p> {{ .Name }} </p> 
+                                </td> 
+                                <td>
+                                    <p> {{ .Doc }}</p>
+                                </td>
+                                <td id="td_type_{{.FieldID}}">  
+                                    <p> {{ .Type }}</p>
+                                </td>
+                                <td id="td_type_{{.FieldID}}">  
+                                    <p> {{ .Classification }}</p>
+                                </td>
+                            </tr>
+                            {{ end }}
+            
+                            </tbody>
+                    </table>
+
+                </div>
+
+            </details>            
+
+        </section><!-- ./ Accordions -->
+
+        <div class="grid" id="navigation">
+            <input id="approval-submit" type="submit" value="Approve">
+        </div>
+
+    </main><!-- ./ Main -->
+
+    <!-- Footer -->
+    <footer class="container">
+        <small></small><a href="#">Data Catalog</a> • <a href="#">Zendesk</a></small>
+    </footer><!-- ./ Footer -->
+
+
+</body>
+
+</html>

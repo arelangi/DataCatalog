@@ -68,9 +68,3 @@ func (a *App) showDataQualityPage() gin.HandlerFunc {
 
 	}
 }
-
-func (a *App) showApprovalPage() gin.HandlerFunc {
-	return func(c *gin.Context) {
-
-	}
-}

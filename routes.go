@@ -45,7 +45,11 @@ func (a *App) initializeRoutes() {
 
 	dataStewardRoutes := a.Engine.Group("/ds")
 	{
-		dataStewardRoutes.GET("/approval", a.showApprovalPage())
+		//Page rendering
+		dataStewardRoutes.GET("/review/:dataset_id", a.showReviewPage())
+
+		//Handle the data steward approval
+		dataStewardRoutes.GET("/approval/:dataset_id", a.approveDatasetHandler())
 	}
 
 }

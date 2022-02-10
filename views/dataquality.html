@@ -61,7 +61,8 @@
                             $('#div_description_'+k).html('<p>'+data['rules'][k].description+'</p>');
                             $('#div_values_'+k).html('<p>'+data['rules'][k].values+'</p>');
                         }
-                        console.log('WTF!');
+
+                        alert('Submitted for approval');
                         $('#dataqualityrules-btn').remove();
                         $('#navigation1').html('<p><a href="/register/sinks/{{ .payload.DatasetID }}">Add Sinks</a></p>');
                         $('#navigation2').html('<button id="approval-btn">Submit For Approval</button>');
