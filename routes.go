@@ -2,10 +2,8 @@ package main
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/gin-gonic/contrib/static"
-	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
@@ -22,7 +20,6 @@ func (a *App) initializeRoutes() {
 	//Group register related routes together
 	registerRoutes := a.Engine.Group("/register")
 	{
-
 		//Page rendering
 		//Render the register page
 		registerRoutes.GET("/start", a.showRegisterPage())
@@ -30,30 +27,25 @@ func (a *App) initializeRoutes() {
 		registerRoutes.GET("/dataquality/:dataset_id", a.showDataQualityPage())
 
 		//API Calls
-
 		//Handle the POST requests at /register/metadata
 		registerRoutes.POST("/metadata", a.registerMetadataHandler())
 
 		//Handle the POST requests at /register/schema
 		registerRoutes.POST("/schema", a.registerSchemaHandler())
 
-		//Handle the POST request at /register/dataclassification
+		//Handle the POST request at /register/classification
 		registerRoutes.POST("/classification", a.dataClassificationHandler())
+
+		//Handle the POST request at /register/quality
+		registerRoutes.POST("/quality", a.dataQualityHandler())
 
 		//Handle the POST requests at /register/lineage
 		registerRoutes.POST("/lineage", a.registerLineageHandler())
-
 	}
 
-	//Test
-	a.Engine.GET("/security", func(ctx *gin.Context) {
-		//render only file, must full name with extension
-		ctx.HTML(http.StatusOK, "security.html", gin.H{
-			"title": "Security file title!!",
-			"add": func(a int, b int) int {
-				return a + b
-			},
-		})
-	})
+	dataStewardRoutes := a.Engine.Group("/ds")
+	{
+		dataStewardRoutes.GET("/approval", a.showApprovalPage())
+	}
 
 }

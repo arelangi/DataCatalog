@@ -40,9 +40,11 @@
                         "team": $('#team').val(),
                         "data_steward": $('#data_steward').val(),
                         "platform_name": $('#platform_name').val(),
+                        /*
                         "host_name": $('#host_name').val(),
                         "database_name": $('#database_name').val(),
                         "schema_name": $('#schema_name').val(),
+                        */
                         "data_classification": $('#data_classification').val(),
                     }),
                     processData: false,
@@ -221,17 +223,20 @@
                         <label>Platform</label>
                         <select id="platform_name" name="PlatformName" required>
                             <option value="Kafka">Kafka</option>
-                            <option value="Postgres" selected>Postgres</option>
-                            <option value="Dynamo">Dynamo</option>
-                            <option value="Riak">Riak</option>
-                            <option value="Data Lake">Data Lake</option>
+                            <!--
+                                <option value="Postgres" selected>Postgres</option>
+                                <option value="Dynamo">Dynamo</option>
+                                <option value="Riak">Riak</option>
+                                <option value="Data Lake">Data Lake</option> 
+                            -->
                         </select>
-                        <input type="text" id="host_name" name="HostName" placeholder="HostName" aria-label="HostName">
-                        <input type="text" id="database_name" name="DatabaseName" placeholder="DatabaseName"
-                            aria-label="DatabaseName">
-                        <input type="text" id="schema_name" name="SchemaName" placeholder="SchemaName"
-                            aria-label="SchemaName">
-
+                        <!--
+                            <input type="text" id="host_name" name="HostName" placeholder="HostName" aria-label="HostName">
+                            <input type="text" id="database_name" name="DatabaseName" placeholder="DatabaseName"
+                                aria-label="DatabaseName">
+                            <input type="text" id="schema_name" name="SchemaName" placeholder="SchemaName"
+                                aria-label="SchemaName">    
+                        -->
                         <label>Security & Privacy</label>
                         <select id="data_classification" name="data_classification" required>
                             <option value="Anon">Anon</option>

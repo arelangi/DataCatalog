@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
+    <!-- <meta charset="utf-8"> -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Data Catalog Registration</title>
     <meta name="description" content="Register new data sets">
@@ -18,56 +18,79 @@
     <script type="text/javascript" src="//cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"> </script>
 
     <script>
-        var meta = 5;
-        var counter = 1;
+        var counter = 0;
         $(document).ready(function () {
 
             var tbl = $('#quality_tbl').DataTable();
             $('#addRow').on('click',function(){
                 tbl.row.add([
-                '<select id="field_name" name="field_name_'+counter+'">{{range .payload.Fields}}<option value="{{ .Name }} "> {{ .Name }} </option>{{ end }}</select>',
-                '<select id="rule_type" name="rule_type_'+counter+'" required><option value="Range">Range</option><option value="Valid Values">Valid Values</option></select>',
-                '<input type="text" id="description" name="description_'+counter+'" placeholder="Rule Description" aria-label="Rule Description" required>',
-                '<input type="text" id="values" name="values_'+counter+'"" placeholder="Comma separated values" aria-label="Comma separated values" required>'
+                '<div id="div_field_name_'+counter+'"><select id="field_name_'+counter+'" name="field_name_'+counter+'">{{range .payload.Fields}}<option value="{{ .Name }}"> {{ .Name }} </option>{{ end }}</select></div>',
+                '<div id="div_rule_type_'+counter+'"><select id="rule_type_'+counter+'" name="rule_type_'+counter+'" required><option value="Range">Range</option><option value="Valid Values">Valid Values</option></select></div>',
+                '<div id="div_description_'+counter+'"><input type="text" id="description_'+counter+'" name="description_'+counter+'" placeholder="Rule Description" aria-label="Rule Description" required></div>',
+                '<div id="div_values_'+counter+'"><input type="text" id="values_'+counter+'" name="values_'+counter+'" placeholder="Comma separated values" aria-label="Comma separated values" required></div>'
                 ]).draw(false);
 
                 counter++;
             });
 
 
-
-
             $('#dataqualityrules-btn').on( 'click', function(event) {
                 var  data = tbl.$('input, select').serialize();
-                console.log(data);
-
-                meta = data;
-                /*
+                
+                postData = {
+                    "dataset_id": parseInt($('#datasetid').val()),
+                    "rules": createJSONBody()
+                }
+                
+                
+                
                 $.ajax({
-                    url: '/register/dataqualityrules',
+                    url: '/register/quality',
                     dataType: 'json',
                     type: 'POST',
-                    contentType: false,
-                    data: new FormData(this),
+                    contentType: 'application/json',
+                    accept: {
+                        json: 'application/json'
+                    },
+                    data: JSON.stringify(postData),
                     processData: false,
                     success: function (data, textStatus, jQxhr) {
-                    
-                        for (var k in data){
-                            $('#td_type_'+k).html('<p>'+data[k]+'</p>');
+                        for (var k in data['rules']){
+                            $('#div_field_name_'+k).html('<p>'+data['rules'][k].field_name+'</p>');
+                            $('#div_rule_type_'+k).html('<p>'+data['rules'][k].rule_type+'</p>');
+                            $('#div_description_'+k).html('<p>'+data['rules'][k].description+'</p>');
+                            $('#div_values_'+k).html('<p>'+data['rules'][k].values+'</p>');
                         }
-
+                        console.log('WTF!');
                         $('#dataqualityrules-btn').remove();
-                        $('#navigation').html('<p><a href="/register/dataquality/{{ .payload.DatasetID }}">Setup DQ Checks</a></p>');
+                        $('#navigation1').html('<p><a href="/register/sinks/{{ .payload.DatasetID }}">Add Sinks</a></p>');
+                        $('#navigation2').html('<button id="approval-btn">Submit For Approval</button>');
                         
                     },
                     error: function (jqXhr, textStatus, errorThrown) {
                         console.log(errorThrown);
                     }
                 });
-                */
+                
 
                 event.preventDefault();
             });
+
+
+            function createJSONBody(){
+                table_length = $('#quality_tbl tbody tr').length;
+                let rules = new Array(); 
+                for (var i =0; i< table_length; i++) {
+                    let thisObj = {
+                        "field_name": $('#field_name_'+i).val(), 
+                        "rule_type": $('#rule_type_'+i).val(),
+                        "description": $('#description_'+i).val(),
+                        "values": $('#values_'+i).val()
+                    };
+                    rules.push(thisObj);
+                }
+                return rules;
+            }
 
         });
 
@@ -109,15 +132,21 @@
 
                 </tbody>
                 </table>
-                <input type="hidden" name="datasetid" value="{{ .payload.DatasetID }}">
+                <input id="datasetid"  type="hidden" name="datasetid" value="{{ .payload.DatasetID }}">
                 <button type="submit" id="dataqualityrules-btn">Submit</button>
             
         </div>
         <br/><br/>
         <br/><br/>
-        <div class="grid" id="navigation">
+        <div class="grid" id="navigation1">
         </div>
             
+        
+        <br/><br/>
+        <br/><br/>
+        <div class="grid" id="navigation2">
+            
+        </div>
 
             
 

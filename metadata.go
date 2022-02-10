@@ -29,9 +29,11 @@ type MetadataRequest struct {
 
 	//Platform attributes
 	PlatformName string `json:"platform_name"`
-	HostName     string `json:"host_name"`
-	DatabaseName string `json:"database_name"`
-	SchemaName   string `json:"schema_name"`
+	/*
+		HostName     string `json:"host_name"`
+		DatabaseName string `json:"database_name"`
+		SchemaName   string `json:"schema_name"`
+	*/
 
 	//Security & Privacy attributes
 	DataClassiffication string `json:"data_classification"`
@@ -72,7 +74,7 @@ func (a *App) registerMetadataHandler() gin.HandlerFunc {
 }
 
 func (m *MetadataRequest) createMetadataRecord(app *App) (err error) {
-	err = app.DB.QueryRow("INSERT INTO datacatalog.public.metadata(dataset_name,  dataset_logical_name,  dataset_description,  dataset_type,  dataset_source,  dataset_share,  dataset_retention,  dataset_retention_justification,  dataset_arrival_frequency, organization,product,team,data_steward,platform_name,host_name,database_name,schema_name,data_classification) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) returning dataset_id, dataset_uuid, metadata_status", m.DatasetName, m.DatasetLogicalName, m.DatasetDescription, m.DatasetType, m.DatasetSource, m.DatasetShare, m.DatasetRetention, m.DatasetRetentionJustification, m.DatasetArrivalFrequency, m.Organization, m.Product, m.Team, m.DataSteward, m.PlatformName, m.HostName, m.DatabaseName, m.SchemaName, m.DataClassiffication).Scan(&m.DatasetID, &m.DatasetUUID, &m.MetadataStatus)
+	err = app.DB.QueryRow("INSERT INTO datacatalog.public.metadata(dataset_name,  dataset_logical_name,  dataset_description,  dataset_type,  dataset_source,  dataset_share,  dataset_retention,  dataset_retention_justification,  dataset_arrival_frequency, organization,product,team,data_steward,platform_name, data_classification) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) returning dataset_id, dataset_uuid, metadata_status", m.DatasetName, m.DatasetLogicalName, m.DatasetDescription, m.DatasetType, m.DatasetSource, m.DatasetShare, m.DatasetRetention, m.DatasetRetentionJustification, m.DatasetArrivalFrequency, m.Organization, m.Product, m.Team, m.DataSteward, m.PlatformName, m.DataClassiffication).Scan(&m.DatasetID, &m.DatasetUUID, &m.MetadataStatus)
 
 	return err
 }
