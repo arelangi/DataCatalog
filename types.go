@@ -10,12 +10,12 @@ type AvroExtractRequest struct {
 }
 
 type SchemaRequest struct {
-	CatalogDatasetID   int64               `json:"catalog_dataset_id"`
-	CatalogDatasetUUID int64               `json:"catalog_dataset_uuid"`
-	SchemaBody         string              `json:"schema_body"`
-	SchemaType         string              `json:"schema_type"`
-	DatasetName        string              `json:"dataset_name"`
-	Avro               AvroExtractResponse `json:"avro"`
+	CatalogDatasetID   int64   `json:"catalog_dataset_id"`
+	CatalogDatasetUUID int64   `json:"catalog_dataset_uuid"`
+	SchemaBody         string  `json:"schema_body"`
+	SchemaType         string  `json:"schema_type"`
+	DatasetName        string  `json:"dataset_name"`
+	Fields             []Field `json:"avro"`
 
 	KafkaRegistryID int64 `json:"kafka_registry_id"`
 }
@@ -70,10 +70,21 @@ type SchemaRegistryResponse struct {
 }
 
 type AvroExtractResponse struct {
-	Status string `json:"status"`
-	Fields []struct {
-		Doc  string `json:"doc"`
-		Name string `json:"name"`
-		Type string `json:"type"`
-	} `json:"data"`
+	Status string  `json:"status"`
+	Fields []Field `json:"data"`
+}
+
+type Field struct {
+	Doc            string `json:"doc"`
+	Name           string `json:"name"`
+	Type           string `json:"type"`
+	Classification string `json:"classification"`
+	FieldID        int64  `json:"field_id"`
+}
+
+type Dataset struct {
+	Fields                []Field `json:"fields"`
+	DatasetName           string  `json:"dataset_name"`
+	DatasetClassification string  `json:"dataset_classification"`
+	DatasetID             int64   `json:"dataset_id"`
 }

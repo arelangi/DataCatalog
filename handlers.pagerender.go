@@ -19,13 +19,14 @@ func (a *App) showDataClassificationPage() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		// Check if the dataset ID is valid
-		if catalogDatasetID, err := strconv.Atoi(c.Param("dataset_id")); err == nil {
+		if catalogDatasetID, err := strconv.ParseInt(c.Param("dataset_id"), 10, 64); err == nil {
 			// Check if the dataset exists
-			if dataset, err := getDatasetByID(catalogDatasetID); err == nil {
+			if dataset, err := a.getDatasetByID(catalogDatasetID); err == nil {
+
 				// Call the render function with the title, dataset and the name of the
 				// template
 				render(c, gin.H{
-					"title": dataset,
+					"payload": dataset,
 				}, "classifydata.html")
 
 			} else {
@@ -41,6 +42,29 @@ func (a *App) showDataClassificationPage() gin.HandlerFunc {
 	}
 }
 
-func getDatasetByID(id int) (val int64, err error) {
-	return
+func (a *App) showDataQualityPage() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		// Check if the dataset ID is valid
+		if catalogDatasetID, err := strconv.ParseInt(c.Param("dataset_id"), 10, 64); err == nil {
+			// Check if the dataset exists
+			if dataset, err := a.getDatasetByID(catalogDatasetID); err == nil {
+
+				// Call the render function with the title, dataset and the name of the
+				// template
+				render(c, gin.H{
+					"payload": dataset,
+				}, "dataquality.html")
+
+			} else {
+				// If the dataset is not found, abort with an error
+				c.AbortWithError(http.StatusNotFound, err)
+			}
+
+		} else {
+			// If an invalid dataset ID is specified in the URL, abort with an error
+			c.AbortWithStatus(http.StatusNotFound)
+		}
+
+	}
 }

@@ -15,155 +15,35 @@
         var meta = 5;
         $(document).ready(function () {
 
-            $('#metadataform').submit(function (event) {
+            $('#dataclassificationform').submit(function (event) {
 
                 $.ajax({
-                    url: '/registerMetadata',
+                    url: '/register/classification',
                     dataType: 'json',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        "dataset_name": $('#dataset_name').val(),
-                        "dataset_logical_name": $('#dataset_logical_name').val(),
-                        "dataset_description": $('#dataset_description').val(),
-                        "dataset_type": $('#dataset_type').val(),
-                        "dataset_source": $('#dataset_source').val(),
-                        "dataset_share": $('#dataset_share').val(),
-                        "dataset_retention": parseInt($('#dataset_retention').val()),
-                        "dataset_retention_justification": $('#dataset_retention_justification').val(),
-                        "dataset_arrival_frequency": $('#dataset_arrival_frequency').val(),
-                        "organization": $('#organization').val(),
-                        "product": $('#product').val(),
-                        "team": $('#team').val(),
-                        "data_steward": $('#data_steward').val(),
-                        "platform_name": $('#platform_name').val(),
-                        "host_name": $('#host_name').val(),
-                        "database_name": $('#database_name').val(),
-                        "schema_name": $('#schema_name').val(),
-                        "data_classification": $('#data_classification').val(),
-                    }),
-                    processData: false,
-                    success: function (data, textStatus, jQxhr) {
-                        //$('#response pre').html( JSON.stringify( data ) );
-
-                        $('.dataset_id').val(data['dataset_id']);
-                        $('.dataset_uuid').val(data['dataset_uuid']);
-
-                        var tblHead = '<br/><table id="metadata_table" role="grid"> <thead> <tr> <th scope="col">Attribute</th><th scope="col">Value</th></tr> </thead>';
-                        var tblBody = '<tbody>';
-
-                        Object.keys(data).forEach(function (key) {
-
-                            var eachRow = '';
-                            if (key == "metadata_status") {
-                                switch (data[key]) {
-                                    case "inventoried":
-                                        eachRow = '<tr><td>' + key + '</td><td>' + '<button class="secondary">Inventoried</button>' + '</td></tr>';
-                                        break;
-                                    case "schema_applied":
-                                        eachRow = '<tr><td>' + key + '</td><td>' + '<button class="contrast">Schema Applied</button>' + '</td></tr>';
-                                        break;
-                                    case "lineage_applied":
-                                        eachRow = '<tr><td>' + key + '</td><td>' + '<button class="outline">Lineage Applied</button>' + '</td></tr>';
-                                        break;
-                                    case "curated":
-                                        eachRow = '<tr><td>' + key + '</td><td>' + '<button class="primary">Curated</button>' + '</td></tr>';
-                                        break;
-                                    default:
-                                        eachRow = '<tr><td>' + key + '</td><td>' + '<button class="outline contrast">Status Unclear</button>' + '</td></tr>';
-                                        break;
-                                }
-                            } else {
-                                eachRow = '<tr><td>' + key + '</td><td>' + data[key] + '</td></tr>';
-                            }
-
-
-
-                            tblBody += eachRow;
-                            //console.log('Key : ' + key + ', Value : ' + meta[key])
-                        })
-
-                        tblBody += '</tbody></table><br/>';
-                        $('#metadata_section').html(tblHead + tblBody);
-
-                        console.log(data);
-                    },
-                    error: function (jqXhr, textStatus, errorThrown) {
-                        console.log(errorThrown);
-                    }
-                });
-
-                event.preventDefault();
-            });
-
-
-            $('#lineageform').submit(function (event) {
-                $.ajax({
-                    url: '/registerLineage',
-                    dataType: 'json',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        "derived_from": $('#derived_from').val(),
-                        "dataset_id": parseInt($(".dataset_id").val()),
-                    }),
-                    processData: false,
-                    success: function (data, textStatus, jQxhr) {
-                        var tblHead = '<br/><table id="lineage_table" role="grid"> <thead> <tr> <th scope="col">Attribute</th><th scope="col">Value</th></tr> </thead>';
-                        var tblBody = '<tbody>';
-                        var eachRow = '<tr><td>Derived From</td><td>' + data["derived_from"] + '</td></tr>';
-                        tblBody += eachRow;
-                        tblBody += '</tbody></table><br/>';
-                        $('#lineage_section').html(tblHead + tblBody);
-                        console.log(data);
-                    },
-                    error: function (jqXhr, textStatus, errorThrown) {
-                        console.log(errorThrown);
-                    }
-                });
-                event.preventDefault();
-            });
-
-
-            $('#schemaform').submit(function (event) {
-                console.log('submitted')
-                $.ajax({
-                    url: '/registerSchema',
                     type: 'POST',
                     contentType: false,
                     data: new FormData(this),
                     processData: false,
-                    success: function (data, textStatus, jqXHR) {
-                        var content = '<pre>' + JSON.stringify(data, undefined, 4) + '</pre>';
-                        $('#schema_section').html(content);
-                        console.log(data);
-                        meta = data;
+                    success: function (data, textStatus, jQxhr) {
+                    
+                        for (var k in data){
+                            $('#td_type_'+k).html('<p>'+data[k]+'</p>');
+                        }
 
-                        ajaxCall2(data['fields']);
-
+                        $('#classification-btn').remove();
+                        $('#navigation').html('<p><a href="/register/dataquality/{{ .payload.DatasetID }}">Setup DQ Checks</a></p>');
+                        
+                    },
+                    error: function (jqXhr, textStatus, errorThrown) {
+                        console.log(errorThrown);
                     }
-
                 });
-                event.preventDefault();
 
+                event.preventDefault();
             });
+
         });
 
-
-        function ajaxCall2(srcData) {
-
-            var tblHead = '<br/><table id="schema_table" role="grid"> <thead> <tr> <th scope="col">Field Name</th><th scope="col">Type</th><th scope="col">Description</th></tr> </thead>';
-            var tblBody = '<tbody>';
-            var fields = srcData['data']
-            for (let index = 0; index < fields.length; index++) {
-                element = fields[index];
-                eachRow = '<tr><td>' + element["name"] + '</td><td>' + element["type"] + '</td><td>' + element["doc"] + '</td></tr>';
-                tblBody += eachRow;
-            }
-            tblBody += '</tbody></table><br/>';
-            $('#schema_section').html(tblHead + tblBody);
-
-        }
 
 
     </script>
@@ -174,163 +54,60 @@
     <!-- Header -->
     <header class="container">
         <hgroup>
-            <h1>Data Registration</h1>
-            <h2>Register your data here!</h2>
+            <h1>Data Classification</h1>
         </hgroup>
     </header><!-- ./ Header -->
 
     <!-- Main -->
     <main class="container">
+        <div id="classification_section">
 
-        <!-- Accordions -->
-        <section id="accordions">
-            <h2>Metadata</h2>
-            <details>
-                <summary>Basic Information</summary>
-                <div id="metadata_section">
-                    <br /><br />
-                    <form id="metadataform">
-                        <input type="text" id="dataset_name" name="Dataset_Name" placeholder="Dataset Name"
-                            aria-label="Dataset Name" required>
-                        <input type="text" id="dataset_logical_name" name="Dataset_Logical_Name"
-                            placeholder="Dataset LogicalName" aria-label="Dataset LogicalName" required>
-                        <input type="text" id="dataset_description" name="Dataset_Description"
-                            placeholder="Dataset Description" aria-label="Dataset Description" required>
-                        <label>Is data sourced externally?</label>
-                        <select id="dataset_source" name="Dataset_Source" required>
-                            <option value="true">Yes</option>
-                            <option value="false" selected>No</option>
-                        </select>
-                        <label>Is data shared externally?</label>
-                        <select id="dataset_share" name="Dataset_Share" required>
-                            <option value="true">Yes</option>
-                            <option value="false" selected>No</option>
-                        </select>
+        <br/>
 
-                        <input type="number" id="dataset_retention" name="Dataset_Retention"
-                            placeholder="Dataset Retention in days(-1 for indefinite)" aria-label="Dataset Retention"
-                            required>
-                        <input type="text" id="dataset_retention_justification" name="Dataset_Retention_Justification"
-                            placeholder="Dataset retention set accoding to data governance policy established in xyz"
-                            aria-label="Dataset Retention Justification" required>
-                        <label>Data Arrival Frequency</label>
-                        <select id="dataset_arrival_frequency" name="Dataset_ArrivalFrequency" required>
-                            <option value="sub-second" selected>Sub second</option>
-                            <option value="minutes" selected>Minutes</option>
-                            <option value="hourly" selected>Hourly</option>
-                            <option value="daily" selected>Daily</option>
-                            <option value="weekly" selected>Weekly</option>
-                            <option value="monthly" selected>Monthly</option>
-                        </select>
-
-                        <br />
-                        <hr />
-                        <br />
-
-                        <label>Ownership</label>
-                        <input type="text" id="organization" name="Org" placeholder="Org" aria-label="Org" required>
-                        <input type="text" id="product" name="Product" placeholder="Product" aria-label="Product"
-                            required>
-                        <input type="text" id="team" name="Team" placeholder="Team" aria-label="Team" required>
-                        <input type="text" id="data_steward" name="Data_Steward" placeholder="Data Steward"
-                            aria-label="Data Steward" required>
-
-                        <br />
-                        <hr />
-                        <br />
-
-                        <label>Platform</label>
-                        <select id="platform_name" name="PlatformName" required>
-                            <option value="Kafka">Kafka</option>
-                            <option value="Postgres" selected>Postgres</option>
-                            <option value="Dynamo">Dynamo</option>
-                            <option value="Riak">Riak</option>
-                            <option value="Data Lake">Data Lake</option>
-                        </select>
-                        <input type="text" id="host_name" name="HostName" placeholder="HostName" aria-label="HostName">
-                        <input type="text" id="database_name" name="DatabaseName" placeholder="DatabaseName"
-                            aria-label="DatabaseName">
-                        <input type="text" id="schema_name" name="SchemaName" placeholder="SchemaName"
-                            aria-label="SchemaName">
-
-                        <label>Security & Privacy</label>
-                        <select id="data_classification" name="data_classification" required>
+        <table id="classification_tbl" role="grid">
+            <form id="dataclassificationform">
+                <thead>
+                    <tr>
+                        <th scope="col"> ID</th>
+                        <th scope="col"> Name</th>
+                        <th scope="col"> Classification</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {{range .payload.Fields}}
+                <tr>
+                    <td> 
+                        {{.FieldID }}
+                    </td> 
+                    <td> 
+                        <p> {{ .Name }} </p> 
+                    </td> 
+                    <td id="td_type_{{.FieldID}}">  
+                        <select id="data_classification{{.FieldID}}" name="{{.FieldID}}" required>
                             <option value="Anon">Anon</option>
                             <option value="NPI">NPI</option>
                             <option value="PCI">PCI</option>
                             <option value="Credit">Credit</option>
                         </select>
+                    </td>
+                </tr>
+                {{ end }}
 
-
-                        <button id="metdata-btn">Submit</button>
-                    </form>
-                </div>
-
-
-            </details>
-            <details>
-                <summary>Schema</summary>
-                <div id="schema_section">
-                    <br /><br />
-                    <form id="schemaform">
-                        <label for="file">Upload your Protobuf/Avro Schema
-                            <input type="file" id="file" name="file" accept=".avsc,.proto">
-                        </label>
-                        <input type="hidden" class="dataset_id" name="DatasetID" placeholder="DatasetID"
-                            aria-label="Dataset ID">
-                        <input type="hidden" class="dataset_uuid" name="DatasetUUID" placeholder="DatasetUUID"
-                            aria-label="Dataset UUID">
-
-                        <input id="schema-submit" type="submit" value="Submit">
-                    </form>
-
-                </div>
-
-            </details>
-            <details>
-                <summary>Lineage</summary>
-                <div id="lineage_section">
-                    <form id="lineageform">
-                        <input type="text" id="derived_from" name="DerivedFrom" placeholder="Derived From"
-                            aria-label="Derived From">
-                        <input type="hidden" class="dataset_id" name="DatasetID" placeholder="DatasetID"
-                            aria-label="Dataset ID">
-                        <input type="hidden" class="dataset_uuid" name="DatasetUUID" placeholder="DatasetUUID"
-                            aria-label="Dataset UUID">
-                        <input id="lineage-submit" type="submit" value="Submit">
-                    </form>
-
-                </div>
-
-            </details>
-            <details>
-                <summary>Data Quality Rules</summary>
-                <div id="dataquality">
-                    <br /><br />
-                    Lorem Ipsum
-
-                </div>
-
-            </details>
-
-            <details>
-                <summary>Configure Sinks</summary>
-                <div id="additionalsinks">
-                    <form id="additionalsinksform">
-                        <label>Dataset Type</label>
-                        <select  id="dataset_type" name="Dataset_Type" required>
-                            <option value="Physical Table">Physical Table</option>
-                            <option value="Logical View">View</option>
-                            <option value="File">File</option>
-                           </select>
-                    </form>
-                </div>
-
-            </details>
+                </tbody>
+                </table>
+                <input type="hidden" name="datasetid" value="{{ .payload.DatasetID }}">
+                <button id="classification-btn">Submit</button>
+            </form>
+        </div>
+        <br/><br/>
+        <br/><br/>
+        <div class="grid" id="navigation">
+        </div>
+            
 
             
 
-        </section><!-- ./ Accordions -->
+        
 
     </main><!-- ./ Main -->
 

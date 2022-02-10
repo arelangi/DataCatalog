@@ -88,7 +88,7 @@ func (a *App) constructRegistryResponseObject(schemaRequest *SchemaRequest, file
 		log.Println("Failed to extract schema from the avro file ")
 	}
 	response.Fields = fields
-	schemaRequest.Avro = response.Fields
+	schemaRequest.Fields = response.Fields.Fields
 	return
 }
 
@@ -144,7 +144,7 @@ func (a *App) saveSchemaReferenceToDB(schemaRequest *SchemaRequest, status strin
 		return err
 	}
 
-	for k, v := range schemaRequest.Avro.Fields {
+	for k, v := range schemaRequest.Fields {
 		_, err = tx.Exec("insert into datacatalog.public.fields(dataset_id, field_id, name, description, types) VALUES($1, $2, $3, $4, $5) on conflict do nothing", schemaRequest.CatalogDatasetID, k, v.Name, v.Doc, v.Type)
 		if err != nil {
 			return err
