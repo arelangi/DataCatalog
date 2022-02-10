@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- <meta charset="utf-8"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Data Catalog Registration</title>
+    <meta name="description" content="Register new data sets">
+    <!-- Pico.css -->
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+
+
+    <!--Jquery -->
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"> </script>
+
+    <!--Data tables-->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css">
+    <script type="text/javascript" src="//cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"> </script>
+
+    <script>
+        var counter = 0;
+        $(document).ready(function () {
+
+            var tbl = $('#quality_tbl').DataTable();
+            $('#addRow').on('click',function(){
+                tbl.row.add([
+                '<div id="div_field_name_'+counter+'"><select id="field_name_'+counter+'" name="field_name_'+counter+'">{{range .payload.Fields}}<option value="{{ .Name }}"> {{ .Name }} </option>{{ end }}</select></div>',
+                '<div id="div_rule_type_'+counter+'"><select id="rule_type_'+counter+'" name="rule_type_'+counter+'" required><option value="Range">Range</option><option value="Valid Values">Valid Values</option></select></div>',
+                '<div id="div_description_'+counter+'"><input type="text" id="description_'+counter+'" name="description_'+counter+'" placeholder="Rule Description" aria-label="Rule Description" required></div>',
+                '<div id="div_values_'+counter+'"><input type="text" id="values_'+counter+'" name="values_'+counter+'" placeholder="Comma separated values" aria-label="Comma separated values" required></div>'
+                ]).draw(false);
+
+                counter++;
+            });
+
+
+            $('#dataqualityrules-btn').on( 'click', function(event) {
+                var  data = tbl.$('input, select').serialize();
+                
+                postData = {
+                    "dataset_id": parseInt($('#datasetid').val()),
+                    "rules": createJSONBody()
+                }
+                
+                
+                
+                $.ajax({
+                    url: '/register/quality',
+                    dataType: 'json',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    accept: {
+                        json: 'application/json'
+                    },
+                    data: JSON.stringify(postData),
+                    processData: false,
+                    success: function (data, textStatus, jQxhr) {
+                        for (var k in data['rules']){
+                            $('#div_field_name_'+k).html('<p>'+data['rules'][k].field_name+'</p>');
+                            $('#div_rule_type_'+k).html('<p>'+data['rules'][k].rule_type+'</p>');
+                            $('#div_description_'+k).html('<p>'+data['rules'][k].description+'</p>');
+                            $('#div_values_'+k).html('<p>'+data['rules'][k].values+'</p>');
+                        }
+
+                        alert('Submitted for approval');
+                        $('#dataqualityrules-btn').remove();
+                        $('#navigation1').html('<p><a href="/register/sinks/{{ .payload.DatasetID }}">Add Sinks</a></p>');
+                        $('#navigation2').html('<button id="approval-btn">Submit For Approval</button>');
+                        
+                    },
+                    error: function (jqXhr, textStatus, errorThrown) {
+                        console.log(errorThrown);
+                    }
+                });
+                
+
+                event.preventDefault();
+            });
+
+
+            function createJSONBody(){
+                table_length = $('#quality_tbl tbody tr').length;
+                let rules = new Array(); 
+                for (var i =0; i< table_length; i++) {
+                    let thisObj = {
+                        "field_name": $('#field_name_'+i).val(), 
+                        "rule_type": $('#rule_type_'+i).val(),
+                        "description": $('#description_'+i).val(),
+                        "values": $('#values_'+i).val()
+                    };
+                    rules.push(thisObj);
+                }
+                return rules;
+            }
+
+        });
+
+
+
+    </script>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="container">
+        <hgroup>
+            <h1>Data Quality Rules</h1>
+        </hgroup>
+    </header><!-- ./ Header -->
+
+    <!-- Main -->
+    <main class="container">
+        <div id="dataqualityrules_section">
+
+        <br/>
+        <div class="grid">
+            <button id="addRow" style="width:15%" >Add new row</button>
+        </div>
+        <table id="quality_tbl" class="display" role="grid">
+                <thead>
+                    <tr>
+                        
+                        <th scope="col"> Field Name </th>
+                        <th scope="col"> Rule Type </th>
+                        <th scope="col"> Rule Description </th>
+                        <th scope="col"> Values </th>
+                    </tr>
+                </thead>
+                <tbody>
+               
+                
+
+                </tbody>
+                </table>
+                <input id="datasetid"  type="hidden" name="datasetid" value="{{ .payload.DatasetID }}">
+                <button type="submit" id="dataqualityrules-btn">Submit</button>
+            
+        </div>
+        <br/><br/>
+        <br/><br/>
+        <div class="grid" id="navigation1">
+        </div>
+            
+        
+        <br/><br/>
+        <br/><br/>
+        <div class="grid" id="navigation2">
+            
+        </div>
+
+            
+
+        
+
+    </main><!-- ./ Main -->
+
+    <!-- Footer -->
+    <footer class="container">
+        <small></small><a href="#">Data Catalog</a> • <a href="#">Zendesk</a></small>
+    </footer><!-- ./ Footer -->
+
+
+</body>
+
+</html>

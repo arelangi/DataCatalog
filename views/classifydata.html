@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Data Catalog Registration</title>
+    <meta name="description" content="Register new data sets">
+    <!-- Pico.css -->
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+
+    <!--Jquery -->
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"> </script>
+    <script>
+        var meta = 5;
+        $(document).ready(function () {
+
+            $('#dataclassificationform').submit(function (event) {
+
+                $.ajax({
+                    url: '/register/classification',
+                    dataType: 'json',
+                    type: 'POST',
+                    contentType: false,
+                    data: new FormData(this),
+                    processData: false,
+                    success: function (data, textStatus, jQxhr) {
+                    
+                        for (var k in data){
+                            $('#td_type_'+k).html('<p>'+data[k]+'</p>');
+                        }
+
+                        $('#classification-btn').remove();
+                        $('#navigation').html('<p><a href="/register/dataquality/{{ .payload.DatasetID }}">Setup DQ Checks</a></p>');
+                        
+                    },
+                    error: function (jqXhr, textStatus, errorThrown) {
+                        console.log(errorThrown);
+                    }
+                });
+
+                event.preventDefault();
+            });
+
+        });
+
+
+
+    </script>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="container">
+        <hgroup>
+            <h1>Data Classification</h1>
+        </hgroup>
+    </header><!-- ./ Header -->
+
+    <!-- Main -->
+    <main class="container">
+        <div id="classification_section">
+
+        <br/>
+
+        <table id="classification_tbl" role="grid">
+            <form id="dataclassificationform">
+                <thead>
+                    <tr>
+                        <th scope="col"> ID</th>
+                        <th scope="col"> Name</th>
+                        <th scope="col"> Classification</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {{range .payload.Fields}}
+                <tr>
+                    <td> 
+                        {{.FieldID }}
+                    </td> 
+                    <td> 
+                        <p> {{ .Name }} </p> 
+                    </td> 
+                    <td id="td_type_{{.FieldID}}">  
+                        <select id="data_classification{{.FieldID}}" name="{{.FieldID}}" required>
+                            <option value="Anon">Anon</option>
+                            <option value="NPI">NPI</option>
+                            <option value="PCI">PCI</option>
+                            <option value="Credit">Credit</option>
+                        </select>
+                    </td>
+                </tr>
+                {{ end }}
+
+                </tbody>
+        </table>
+                <input type="hidden" name="datasetid" value="{{ .payload.DatasetID }}">
+                <button id="classification-btn">Submit</button>
+            </form>
+        </div>
+        <br/><br/>
+        <br/><br/>
+        <div class="grid" id="navigation">
+        </div>
+            
+
+            
+
+        
+
+    </main><!-- ./ Main -->
+
+    <!-- Footer -->
+    <footer class="container">
+        <small></small><a href="#">Data Catalog</a> • <a href="#">Zendesk</a></small>
+    </footer><!-- ./ Footer -->
+
+
+</body>
+
+</html>

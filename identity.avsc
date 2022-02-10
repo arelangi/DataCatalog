@@ -1,0 +1,28 @@
+{
+	"namespace": "arelangi.namespace.com",
+	"type":	"record",
+	"name": "identity",
+	"fields": [
+		{ "name": "FirstName", "type": "string", "doc": "First name of the user"},
+		{ "name": "LastName", "type": "string", "doc": "Last name of the user"},
+		{ "name": "Errors", "type": ["null", {"type":"array", "items":"string"}], "default": null, "doc": "Errors is an array of error strings and is an optional value" },
+		{ "name": "Address", "type": [
+			"null",
+			{
+				"namespace": "arelangi.namespace.com",
+				"type":	"record",
+				"name": "address",
+				"fields": [
+					{ "name": "Address1", "type": "string", "doc": "Represents the street address" },
+					{ "name": "Address2", "type": ["null", "string"], "default": null, "doc": "Represents the apt. unit or suite number" },
+					{ "name": "City", "type": "string", "doc": "Name of the city" },
+					{ "name": "State", "type": "string", "doc": "Name of the state" },
+					{ "name": "Zip", "type": "int", "doc": "Postal code of the address" }
+				]
+			}
+			],
+			"default":null,
+			"doc": "Represents a US address"
+		}
+	]
+}
