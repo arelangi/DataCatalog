@@ -153,11 +153,10 @@
                     processData: false,
                     success: function (data, textStatus, jqXHR) {
                         console.log(data);
-                        meta = data;
                         $('#partition-btn').hide();
                         alert('Success');
                         $('#metadata_status').html('<button class="contrast">Schema Applied</button>');
-                        $('#navigation').html('<p><a href="/register/classifydata/'+data['dataset_id']+'">Register Data Classification Indicators</a></p>');
+                        $('#navigation').html('<p><a href="/register/classifydata/'+meta['dataset_id']+'">Register Data Classification Indicators</a></p>');
                     }
 
                 });
