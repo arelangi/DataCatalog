@@ -1,10 +1,9 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"net/http"
+	"strings"
+	"time"
 )
 
 type SparkSubmitPayload struct {
@@ -25,31 +24,37 @@ type SparkSubmitPayload struct {
 	HoodieSchemaRegistyrURL      string `json:"hoodie_schema_registyr_url"`
 	HoodieConfAutoOffsetReset    string `json:"hoodie_conf_auto_offset_reset"`
 	HoodieStream                 bool   `json:"hoodie_stream"`
+	IsComplexPrimaryKey          bool   `json:"is_complex_primary_key"`
 }
 
-type HudiSyncRequest struct {
-	DatasetName         string
-	Recordkey           string
-	PartitionKey        string
-	SourceOrderingField string
+type HiveSubmitPayload struct {
+	PartitionedBy   string `json:"partitioned_by"`
+	BasePath        string `json:"base_path"`
+	Database        string `json:"database"`
+	Table           string `json:"table"`
+	IsMultiPartKeys bool   `json:"is_multi_part_keys"`
+}
+
+type HudiSyncSuccess struct {
+	Message string `json:"message"`
 }
 
 //syncToHudi submits a spark-submit job to sync the topic contents to Hudi
-func (a *App) syncToHudi(p HudiSyncRequest) {
-	fmt.Println("In sync to hudi")
-	return
-	payload := SparkSubmitPayload{
+func (a *App) syncToHudi(p PartitionDataset) (err error) {
+	var successMessage HudiSyncSuccess
+
+	sparkSubmitPayload := SparkSubmitPayload{
 		Class:                        "org.apache.hudi.utilities.deltastreamer.HoodieDeltaStreamer",
 		Jar:                          "/var/hoodie/ws/docker/hoodie/hadoop/hive_base/target/hoodie-utilities.jar",
 		TableType:                    "MERGE_ON_READ",
 		SourceClass:                  "org.apache.hudi.utilities.sources.AvroKafkaSource",
-		SourceOrderingField:          p.SourceOrderingField,
+		SourceOrderingField:          "last_updated_time",
 		TargetBasePath:               fmt.Sprintf("/user/hive/warehouse/%s_mor", p.DatasetName),
 		TargetTable:                  fmt.Sprintf("%s_mor", p.DatasetName),
 		SchemaProviderClass:          "org.apache.hudi.utilities.schema.SchemaRegistryProvider",
 		HoodieConfSchemaRegistryURL:  fmt.Sprintf("hoodie.deltastreamer.schemaprovider.registry.url=http://schemaregistry:8082/subjects/%s-value/versions/latest", p.DatasetName),
-		HoodieConfRecordKeyField:     fmt.Sprintf("hoodie.datasource.write.recordkey.field=%s", p.Recordkey),
-		HoodieConfPartitionPathField: fmt.Sprintf("hoodie.datasource.write.partitionpath.field=%s", p.PartitionKey),
+		HoodieConfRecordKeyField:     fmt.Sprintf("hoodie.datasource.write.recordkey.field=%s", strings.Join(p.PrimaryKeys, ",")),
+		HoodieConfPartitionPathField: fmt.Sprintf("hoodie.datasource.write.partitionpath.field=%s", p.PartitionPath),
 		HoodieConfKafkaTopic:         fmt.Sprintf("hoodie.deltastreamer.source.kafka.topic=%s", p.DatasetName),
 		HoodieBootStrapServers:       "bootstrap.servers=kafkabroker:9092",
 		HoodieKafkaConsumerGroupID:   "group.id=hudi-deltastreamer-consumer",
@@ -57,21 +62,39 @@ func (a *App) syncToHudi(p HudiSyncRequest) {
 		HoodieConfAutoOffsetReset:    "auto.offset.reset=earliest",
 		HoodieStream:                 true,
 	}
-	payloadBytes, err := json.Marshal(payload)
-	if err != nil {
-		// handle err
-	}
-	body := bytes.NewReader(payloadBytes)
 
-	req, err := http.NewRequest("POST", "http://hudisync:9082/sparkSubmit", body)
-	if err != nil {
-		fmt.Println(err)
+	hiveSubmitPayload := HiveSubmitPayload{
+		PartitionedBy: p.PartitionPath,
+		BasePath:      fmt.Sprintf("/user/hive/warehouse/%s_mor", p.DatasetName),
+		Database:      "default",
+		Table:         fmt.Sprintf("%s_mor", p.DatasetName),
 	}
-	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		fmt.Println(err)
+	if len(p.PrimaryKeys) > 1 {
+		sparkSubmitPayload.IsComplexPrimaryKey = true
+		hiveSubmitPayload.IsMultiPartKeys = true
 	}
-	defer resp.Body.Close()
+
+	headersMap := map[string]string{
+		"Content-Type": "application/json",
+	}
+	sparkSubmitURL := "http://hudisync:2049/sparkSubmit"
+	err = makePostCall(sparkSubmitPayload, headersMap, sparkSubmitURL, &successMessage, &successMessage)
+	if err != nil {
+		fmt.Println("Failed to submit the spark job")
+		return
+	}
+
+	time.Sleep(30 * time.Second)
+
+	hiveSubmitURL := "http://hudisync:2049/hiveSubmit"
+	err = makePostCall(hiveSubmitPayload, headersMap, hiveSubmitURL, &successMessage, &successMessage)
+	if err != nil {
+		fmt.Println("Failed to sync to hive")
+		return
+	}
+
+	fmt.Println("Returning from hudi sync function with the error ", err)
+
+	return
 }

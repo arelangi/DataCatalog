@@ -1,13 +1,6 @@
 package main
 
-import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"net/http"
-	"strings"
-)
+import "fmt"
 
 type KafkaTopicPayload struct {
 	TopicName         string              `json:"topic_name"`
@@ -26,48 +19,18 @@ func (a *App) createKafkaTopic(payload KafkaTopicPayload, clusterID string) (err
 	var succesMessage KafkaTopicSuccessMsg
 	var failureMessage KafkaTopicFailureMsg
 
-	payloadBytes, err := json.Marshal(payload)
-	if err != nil {
-		fmt.Println("Failed to marshal the payload to JSON")
-		return
+	headersMap := map[string]string{
+		"Content-Type": "application/json",
 	}
 
-	body := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequest("POST", fmt.Sprintf("http://restproxy:9082/v3/clusters/%s/topics", clusterID), body)
-	if err != nil {
-		fmt.Println("Failed to create the http request")
-		return
-	}
-	req.Header.Set("Content-Type", "application/json")
+	url := fmt.Sprintf("http://restproxy:9082/v3/clusters/%s/topics", clusterID)
 
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		fmt.Println("Failure on executing the request to create kafka topic")
-		return
-	}
-	defer resp.Body.Close()
+	fmt.Println("Tried to register topic at the url", url)
 
-	jsonDataFromHttp, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println("Failed to read the response from Kafka")
-		return
-	}
+	err = makePostCall(payload, headersMap, url, &succesMessage, &failureMessage)
 
-	err = json.Unmarshal([]byte(jsonDataFromHttp), &succesMessage)
-	if err != nil {
-		err = json.Unmarshal([]byte(jsonDataFromHttp), &failureMessage)
-		if err != nil {
-			fmt.Println("Unkown response returned from Kafka")
-			return
-		} else {
-			if strings.Contains(failureMessage.Message, "already exists") {
-				err = nil
-			} else {
-				fmt.Println("Unexpected response returned from Kafka")
-				return
-			}
-		}
-	}
+	fmt.Println("error when registering topic is ", err)
+
 	return
 }
 

@@ -71,11 +71,15 @@ func (a *App) approveDatasetHandler() gin.HandlerFunc {
 		if err != nil {
 			panic(err)
 		}
-		datasetName := a.getDatasetName(catalogDatasetID)
+		partitionDetails, err := a.getPartitionDetailsForDataset(catalogDatasetID)
+		partitionDetails.DatasetName = a.getDatasetName(catalogDatasetID)
 
+		if err != nil {
+			panic(err)
+		}
 		//Create Kafka Topic
 		KafkaTopicPayloadData := KafkaTopicPayload{
-			TopicName:         datasetName,
+			TopicName:         partitionDetails.DatasetName,
 			PartitionsCount:   1,
 			ReplicationFactor: 1,
 		}
@@ -89,10 +93,13 @@ func (a *App) approveDatasetHandler() gin.HandlerFunc {
 		}
 
 		//Submit job to spark
-		hudiSyncData := HudiSyncRequest{
-			DatasetName: datasetName,
+		err = a.syncToHudi(partitionDetails)
+		if err != nil {
+			fmt.Println("Failed to submit hive job")
+			panic(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"status": "Failure", "message": err.Error()})
+			return
 		}
-		a.syncToHudi(hudiSyncData)
 
 		//Get the Kafka Cluster Info
 		c.JSON(http.StatusOK, gin.H{"status": "Approved"})
@@ -128,6 +135,34 @@ func (a *App) getKafkaClusterID() string {
 func (a *App) getDatasetName(id int64) (datasetName string) {
 	a.DB.QueryRow("Select dataset_name from datacatalog.public.metadata where dataset_id=$1", id).Scan(&datasetName)
 	return
+}
+
+func (a *App) getPartitionDetailsForDataset(id int64) (resp PartitionDataset, err error) {
+	rows, err := a.DB.Query("select name from datacatalog.public.fields where dataset_id=$1 and primarykeyfield=true", id)
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var name string
+		err = rows.Scan(&name)
+		if err != nil {
+			return
+		}
+
+		resp.PrimaryKeys = append(resp.PrimaryKeys, name)
+	}
+
+	err = a.DB.QueryRow("select name from datacatalog.public.fields where dataset_id=$1 and partitionfield=true", id).Scan(&resp.PartitionPath)
+	return
+
+}
+
+type PartitionDataset struct {
+	DatasetName   string
+	PrimaryKeys   []string
+	PartitionPath string
 }
 
 type ClusterResponse struct {
