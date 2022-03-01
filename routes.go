@@ -33,6 +33,9 @@ func (a *App) initializeRoutes() {
 		//Handle the POST requests at /register/schema
 		registerRoutes.POST("/schema", a.registerSchemaHandler())
 
+		//Handle the POST requests at /register/partitions
+		registerRoutes.POST("/partitions", a.registerPartitionsHandler())
+
 		//Handle the POST request at /register/classification
 		registerRoutes.POST("/classification", a.dataClassificationHandler())
 
