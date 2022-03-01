@@ -1,0 +1,1686 @@
+[
+  {
+    "type": "record",
+    "name": "DatasetKey",
+    "namespace": "com.linkedin.metadata.key",
+    "doc": "Key for a Dataset",
+    "fields": [
+      {
+        "name": "platform",
+        "type": {
+          "type": "typeref",
+          "name": "Urn",
+          "namespace": "com.linkedin.common",
+          "ref": "string",
+          "java": {
+            "class": "com.linkedin.common.urn.Urn"
+          }
+        },
+        "doc": "Data platform urn associated with the dataset"
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "doc": "Dataset native name e.g. <db>.<table>, /dir/subdir/<name>, or <name>",
+        "Searchable": {
+          "boostScore": 10,
+          "enableAutocomplete": true,
+          "fieldType": "TEXT_PARTIAL"
+        }
+      },
+      {
+        "name": "origin",
+        "type": {
+          "type": "enum",
+          "name": "FabricType",
+          "namespace": "com.linkedin.common",
+          "doc": "Fabric group type",
+          "symbols": [
+            "DEV",
+            "TEST",
+            "QA",
+            "UAT",
+            "EI",
+            "STG",
+            "NON_PROD",
+            "PROD",
+            "CORP"
+          ],
+          "symbolDocs": {
+            "CORP": "Designates corporation fabrics",
+            "DEV": "Designates development fabrics",
+            "EI": "Designates early-integration fabrics",
+            "NON_PROD": "Designates non-production fabrics",
+            "PROD": "Designates production fabrics",
+            "QA": "Designates quality assurance fabrics",
+            "STG": "Designates staging fabrics",
+            "TEST": "Designates testing fabrics",
+            "UAT": "Designates user acceptance testing fabrics"
+          }
+        },
+        "doc": "Fabric type where dataset belongs to or where it was generated.",
+        "Searchable": {
+          "addToFilters": true,
+          "fieldType": "TEXT_PARTIAL",
+          "filterNameOverride": "Environment",
+          "queryByDefault": false
+        }
+      }
+    ],
+    "Aspect": {
+      "name": "datasetKey"
+    }
+  },
+    {
+    "type": "record",
+    "name": "Ownership",
+    "namespace": "com.linkedin.common",
+    "doc": "Ownership information of an entity.",
+    "fields": [
+      {
+        "name": "owners",
+        "type": {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "Owner",
+            "doc": "Ownership information",
+            "fields": [
+              {
+                "name": "owner",
+                "type": "Urn",
+                "doc": "Owner URN, e.g. urn:li:corpuser:ldap, urn:li:corpGroup:group_name, and urn:li:multiProduct:mp_name\n(Caveat: only corpuser is currently supported in the frontend.)",
+                "Relationship": {
+                  "entityTypes": [
+                    "corpUser",
+                    "corpGroup"
+                  ],
+                  "name": "OwnedBy"
+                },
+                "Searchable": {
+                  "addToFilters": true,
+                  "fieldName": "owners",
+                  "fieldType": "URN",
+                  "filterNameOverride": "Owned By",
+                  "hasValuesFieldName": "hasOwners",
+                  "queryByDefault": false
+                }
+              },
+              {
+                "name": "type",
+                "type": {
+                  "type": "enum",
+                  "name": "OwnershipType",
+                  "doc": "Owner category or owner role",
+                  "symbols": [
+                    "DEVELOPER",
+                    "DATAOWNER",
+                    "DELEGATE",
+                    "PRODUCER",
+                    "CONSUMER",
+                    "STAKEHOLDER"
+                  ],
+                  "symbolDocs": {
+                    "CONSUMER": "A person, group, or service that consumes the data",
+                    "DATAOWNER": "A person or group that is owning the data",
+                    "DELEGATE": "A person or a group that overseas the operation, e.g. a DBA or SRE.",
+                    "DEVELOPER": "A person or group that is in charge of developing the code",
+                    "PRODUCER": "A person, group, or service that produces/generates the data",
+                    "STAKEHOLDER": "A person or a group that has direct business interest"
+                  }
+                },
+                "doc": "The type of the ownership"
+              },
+              {
+                "name": "source",
+                "type": {
+                  "type": "record",
+                  "name": "OwnershipSource",
+                  "doc": "Source/provider of the ownership information",
+                  "fields": [
+                    {
+                      "name": "type",
+                      "type": {
+                        "type": "enum",
+                        "name": "OwnershipSourceType",
+                        "symbols": [
+                          "AUDIT",
+                          "DATABASE",
+                          "FILE_SYSTEM",
+                          "ISSUE_TRACKING_SYSTEM",
+                          "MANUAL",
+                          "SERVICE",
+                          "SOURCE_CONTROL",
+                          "OTHER"
+                        ],
+                        "symbolDocs": {
+                          "AUDIT": "Auditing system or audit logs",
+                          "DATABASE": "Database, e.g. GRANTS table",
+                          "FILE_SYSTEM": "File system, e.g. file/directory owner",
+                          "ISSUE_TRACKING_SYSTEM": "Issue tracking system, e.g. Jira",
+                          "MANUAL": "Manually provided by a user",
+                          "OTHER": "Other sources",
+                          "SERVICE": "Other ownership-like service, e.g. Nuage, ACL service etc",
+                          "SOURCE_CONTROL": "SCM system, e.g. GIT, SVN"
+                        }
+                      },
+                      "doc": "The type of the source"
+                    },
+                    {
+                      "name": "url",
+                      "type": "string",
+                      "doc": "A reference URL for the source",
+                      "optional": true
+                    }
+                  ]
+                },
+                "doc": "Source information for the ownership",
+                "optional": true
+              }
+            ]
+          }
+        },
+        "doc": "List of owners of the entity."
+      },
+      {
+        "name": "lastModified",
+        "type": "AuditStamp",
+        "doc": "Audit stamp containing who last modified the record and when. A value of 0 in the time field indicates missing data.",
+        "default": {
+          "actor": "urn:li:corpuser:unknown",
+          "time": 0
+        }
+      }
+    ],
+    "Aspect": {
+      "name": "ownership"
+    }
+  },
+  {
+    "type": "record",
+    "name": "DatasetProperties",
+    "namespace": "com.linkedin.dataset",
+    "doc": "Properties associated with a Dataset",
+    "include": [
+      {
+        "type": "record",
+        "name": "CustomProperties",
+        "namespace": "com.linkedin.common",
+        "doc": "Misc. properties about an entity.",
+        "fields": [
+          {
+            "name": "customProperties",
+            "type": {
+              "type": "map",
+              "values": "string"
+            },
+            "doc": "Custom property bag.",
+            "default": {},
+            "Searchable": {
+              "/*": {
+                "queryByDefault": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "type": "record",
+        "name": "ExternalReference",
+        "namespace": "com.linkedin.common",
+        "doc": "A reference to an external platform.",
+        "fields": [
+          {
+            "name": "externalUrl",
+            "type": {
+              "type": "typeref",
+              "name": "Url",
+              "ref": "string",
+              "java": {
+                "class": "com.linkedin.common.url.Url",
+                "coercerClass": "com.linkedin.common.url.UrlCoercer"
+              }
+            },
+            "doc": "URL where the reference exist",
+            "optional": true
+          }
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "name": "description",
+        "type": "string",
+        "doc": "Documentation of the dataset",
+        "optional": true,
+        "Searchable": {
+          "fieldType": "TEXT",
+          "hasValuesFieldName": "hasDescription"
+        }
+      },
+      {
+        "name": "uri",
+        "type": {
+          "type": "typeref",
+          "name": "Uri",
+          "namespace": "com.linkedin.common",
+          "ref": "string",
+          "java": {
+            "class": "java.net.URI"
+          }
+        },
+        "doc": "The abstracted URI such as hdfs:///data/tracking/PageViewEvent, file:///dir/file_name. Uri should not include any environment specific properties. Some datasets might not have a standardized uri, which makes this field optional (i.e. kafka topic).",
+        "optional": true
+      },
+      {
+        "name": "tags",
+        "type": {
+          "type": "array",
+          "items": "string"
+        },
+        "doc": "[Legacy] Unstructured tags for the dataset. Structured tags can be applied via the `GlobalTags` aspect.",
+        "default": []
+      }
+    ],
+    "Aspect": {
+      "name": "datasetProperties"
+    }
+  },
+  {
+    "type": "record",
+    "name": "EditableDatasetProperties",
+    "namespace": "com.linkedin.dataset",
+    "doc": "EditableDatasetProperties stores editable changes made to dataset properties. This separates changes made from\ningestion pipelines and edits in the UI to avoid accidental overwrites of user-provided data by ingestion pipelines",
+    "include": [
+      {
+        "type": "record",
+        "name": "ChangeAuditStamps",
+        "namespace": "com.linkedin.common",
+        "doc": "Data captured on a resource/association/sub-resource level giving insight into when that resource/association/sub-resource moved into various lifecycle stages, and who acted to move it into those lifecycle stages. The recommended best practice is to include this record in your record schema, and annotate its fields as @readOnly in your resource. See https://github.com/linkedin/rest.li/wiki/Validation-in-Rest.li#restli-validation-annotations",
+        "fields": [
+          {
+            "name": "created",
+            "type": {
+              "type": "record",
+              "name": "AuditStamp",
+              "doc": "Data captured on a resource/association/sub-resource level giving insight into when that resource/association/sub-resource moved into a particular lifecycle stage, and who acted to move it into that specific lifecycle stage.",
+              "fields": [
+                {
+                  "name": "time",
+                  "type": {
+                    "type": "typeref",
+                    "name": "Time",
+                    "doc": "Number of milliseconds since midnight, January 1, 1970 UTC. It must be a positive number",
+                    "ref": "long"
+                  },
+                  "doc": "When did the resource/association/sub-resource move into the specific lifecycle stage represented by this AuditEvent."
+                },
+                {
+                  "name": "actor",
+                  "type": "Urn",
+                  "doc": "The entity (e.g. a member URN) which will be credited for moving the resource/association/sub-resource into the specific lifecycle stage. It is also the one used to authorize the change."
+                },
+                {
+                  "name": "impersonator",
+                  "type": "Urn",
+                  "doc": "The entity (e.g. a service URN) which performs the change on behalf of the Actor and must be authorized to act as the Actor.",
+                  "optional": true
+                }
+              ]
+            },
+            "doc": "An AuditStamp corresponding to the creation of this resource/association/sub-resource. A value of 0 for time indicates missing data.",
+            "default": {
+              "actor": "urn:li:corpuser:unknown",
+              "time": 0
+            }
+          },
+          {
+            "name": "lastModified",
+            "type": "AuditStamp",
+            "doc": "An AuditStamp corresponding to the last modification of this resource/association/sub-resource. If no modification has happened since creation, lastModified should be the same as created. A value of 0 for time indicates missing data.",
+            "default": {
+              "actor": "urn:li:corpuser:unknown",
+              "time": 0
+            }
+          },
+          {
+            "name": "deleted",
+            "type": "AuditStamp",
+            "doc": "An AuditStamp corresponding to the deletion of this resource/association/sub-resource. Logically, deleted MUST have a later timestamp than creation. It may or may not have the same time as lastModified depending upon the resource/association/sub-resource semantics.",
+            "optional": true
+          }
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "name": "description",
+        "type": "string",
+        "doc": "Documentation of the dataset",
+        "optional": true,
+        "Searchable": {
+          "fieldName": "editedDescription",
+          "fieldType": "TEXT"
+        }
+      }
+    ],
+    "Aspect": {
+      "name": "editableDatasetProperties"
+    }
+  },
+  {
+    "type": "record",
+    "name": "DatasetDeprecation",
+    "namespace": "com.linkedin.dataset",
+    "doc": "Dataset deprecation status\nDeprecated! This aspect is deprecated in favor of the more-general-purpose 'Deprecation' aspect.",
+    "fields": [
+      {
+        "name": "deprecated",
+        "type": "boolean",
+        "doc": "Whether the dataset is deprecated by owner.",
+        "Searchable": {
+          "fieldType": "BOOLEAN",
+          "weightsPerFieldValue": {
+            "true": 0.5
+          }
+        }
+      },
+      {
+        "name": "decommissionTime",
+        "type": "long",
+        "doc": "The time user plan to decommission this dataset.",
+        "optional": true
+      },
+      {
+        "name": "note",
+        "type": "string",
+        "doc": "Additional information about the dataset deprecation plan, such as the wiki, doc, RB."
+      },
+      {
+        "name": "actor",
+        "type": "com.linkedin.common.Urn",
+        "doc": "The corpuser URN which will be credited for modifying this deprecation content.",
+        "optional": true
+      }
+    ],
+    "Aspect": {
+      "name": "datasetDeprecation"
+    },
+    "Deprecated": true
+  },
+  {
+    "type": "record",
+    "name": "DatasetUpstreamLineage",
+    "namespace": "com.linkedin.dataset",
+    "doc": "Fine Grained upstream lineage for fields in a dataset",
+    "fields": [
+      {
+        "name": "fieldMappings",
+        "type": {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "DatasetFieldMapping",
+            "doc": "Representation of mapping between fields in source dataset to the field in destination dataset",
+            "include": [
+              {
+                "type": "record",
+                "name": "BaseFieldMapping",
+                "namespace": "com.linkedin.common",
+                "doc": "Base model representing field mappings",
+                "fields": [
+                  {
+                    "name": "created",
+                    "type": "AuditStamp",
+                    "doc": "Audit stamp containing who reported the field mapping and when"
+                  },
+                  {
+                    "name": "transformation",
+                    "type": [
+                      {
+                        "type": "enum",
+                        "name": "TransformationType",
+                        "namespace": "com.linkedin.common.fieldtransformer",
+                        "doc": "Type of the transformation involved in generating destination fields from source fields.",
+                        "symbols": [
+                          "BLACKBOX",
+                          "IDENTITY"
+                        ],
+                        "symbolDocs": {
+                          "BLACKBOX": "Field transformation expressed as unknown black box function.",
+                          "IDENTITY": "Field transformation expressed as Identity function."
+                        }
+                      },
+                      {
+                        "type": "record",
+                        "name": "UDFTransformer",
+                        "namespace": "com.linkedin.common.fieldtransformer",
+                        "doc": "Field transformation expressed in UDF",
+                        "fields": [
+                          {
+                            "name": "udf",
+                            "type": "string",
+                            "doc": "A UDF mentioning how the source fields got transformed to destination field. This is the FQCN(Fully Qualified Class Name) of the udf."
+                          }
+                        ]
+                      }
+                    ],
+                    "doc": "Transfomration function between the fields involved"
+                  }
+                ]
+              }
+            ],
+            "fields": [
+              {
+                "name": "sourceFields",
+                "type": {
+                  "type": "array",
+                  "items": {
+                    "type": "typeref",
+                    "name": "DatasetFieldUpstream",
+                    "doc": "Upstreams of a dataset field.",
+                    "ref": [
+                      {
+                        "type": "typeref",
+                        "name": "DatasetFieldUrn",
+                        "namespace": "com.linkedin.common",
+                        "doc": "Standardized dataset field information identifier.",
+                        "ref": "string",
+                        "deprecated": "use SchemaFieldPath and represent as generic Urn instead",
+                        "java": {
+                          "class": "com.linkedin.common.urn.DatasetFieldUrn"
+                        },
+                        "validate": {
+                          "com.linkedin.common.validator.TypedUrnValidator": {
+                            "accessible": true,
+                            "constructable": true,
+                            "doc": "Standardized dataset field information identifier",
+                            "entityType": "datasetField",
+                            "fields": [
+                              {
+                                "doc": "Dataset that this dataset field belongs to.",
+                                "name": "dataset",
+                                "type": "com.linkedin.common.urn.DatasetUrn"
+                              },
+                              {
+                                "doc": "Dataset field path",
+                                "maxLength": 500,
+                                "name": "fieldPath",
+                                "type": "string"
+                              }
+                            ],
+                            "maxLength": 807,
+                            "name": "DatasetField",
+                            "namespace": "li",
+                            "owners": [
+                              "urn:li:corpuser:fbar",
+                              "urn:li:corpuser:bfoo"
+                            ],
+                            "owningTeam": "urn:li:internalTeam:datahub"
+                          }
+                        }
+                      }
+                    ],
+                    "deprecated": "refer FineGrainedLineage for alternative representation"
+                  }
+                },
+                "doc": "Source fields from which the fine grained lineage is derived"
+              },
+              {
+                "name": "destinationField",
+                "type": "com.linkedin.common.DatasetFieldUrn",
+                "doc": "Destination field which is derived from source fields"
+              }
+            ],
+            "deprecated": "use FineGrainedLineage instead"
+          }
+        },
+        "doc": "Upstream to downstream field level lineage mappings"
+      }
+    ],
+    "Aspect": {
+      "name": "datasetUpstreamLineage"
+    },
+    "deprecated": "use UpstreamLineage.fineGrainedLineages instead"
+  },
+  {
+    "type": "record",
+    "name": "UpstreamLineage",
+    "namespace": "com.linkedin.dataset",
+    "doc": "Upstream lineage of a dataset",
+    "fields": [
+      {
+        "name": "upstreams",
+        "type": {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "Upstream",
+            "doc": "Upstream lineage information about a dataset including the source reporting the lineage",
+            "fields": [
+              {
+                "name": "auditStamp",
+                "type": "com.linkedin.common.AuditStamp",
+                "doc": "Audit stamp containing who reported the lineage and when.\nWARNING: this field is deprecated and may be removed in a future release.",
+                "default": {
+                  "actor": "urn:li:corpuser:unknown",
+                  "time": 0
+                },
+                "deprecated": "we no longer associate a timestamp per upstream edge"
+              },
+              {
+                "name": "dataset",
+                "type": {
+                  "type": "typeref",
+                  "name": "DatasetUrn",
+                  "namespace": "com.linkedin.common",
+                  "doc": "Standardized dataset identifier.",
+                  "ref": "string",
+                  "java": {
+                    "class": "com.linkedin.common.urn.DatasetUrn"
+                  },
+                  "validate": {
+                    "com.linkedin.common.validator.TypedUrnValidator": {
+                      "accessible": true,
+                      "constructable": true,
+                      "doc": "Standardized dataset identifier.",
+                      "entityType": "dataset",
+                      "fields": [
+                        {
+                          "doc": "Standardized platform urn where dataset is defined.",
+                          "name": "platform",
+                          "type": "com.linkedin.common.urn.DataPlatformUrn"
+                        },
+                        {
+                          "doc": "Dataset native name e.g. <db>.<table>, /dir/subdir/<name>, or <name>",
+                          "maxLength": 210,
+                          "name": "datasetName",
+                          "type": "string"
+                        },
+                        {
+                          "doc": "Fabric type where dataset belongs to or where it was generated.",
+                          "name": "origin",
+                          "type": "com.linkedin.common.FabricType"
+                        }
+                      ],
+                      "maxLength": 284,
+                      "name": "Dataset",
+                      "namespace": "li",
+                      "owners": [
+                        "urn:li:corpuser:fbar",
+                        "urn:li:corpuser:bfoo"
+                      ],
+                      "owningTeam": "urn:li:internalTeam:datahub"
+                    }
+                  }
+                },
+                "doc": "The upstream dataset the lineage points to",
+                "Relationship": {
+                  "entityTypes": [
+                    "dataset"
+                  ],
+                  "name": "DownstreamOf"
+                },
+                "Searchable": {
+                  "fieldName": "upstreams",
+                  "fieldType": "URN",
+                  "queryByDefault": false
+                }
+              },
+              {
+                "name": "type",
+                "type": {
+                  "type": "enum",
+                  "name": "DatasetLineageType",
+                  "doc": "The various types of supported dataset lineage",
+                  "symbols": [
+                    "COPY",
+                    "TRANSFORMED",
+                    "VIEW"
+                  ],
+                  "symbolDocs": {
+                    "COPY": "Direct copy without modification",
+                    "TRANSFORMED": "Transformed data with modification (format or content change)",
+                    "VIEW": "Represents a view defined on the sources e.g. Hive view defined on underlying hive tables or a Hive table pointing to a HDFS dataset or DALI view defined on multiple sources"
+                  }
+                },
+                "doc": "The type of the lineage"
+              }
+            ]
+          }
+        },
+        "doc": "List of upstream dataset lineage information"
+      },
+      {
+        "name": "fineGrainedLineages",
+        "type": {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "FineGrainedLineage",
+            "doc": "A fine-grained lineage from upstream fields/datasets to downstream field(s)",
+            "fields": [
+              {
+                "name": "upstreamType",
+                "type": {
+                  "type": "enum",
+                  "name": "FineGrainedLineageUpstreamType",
+                  "doc": "The type of upstream entity in a fine-grained lineage",
+                  "symbols": [
+                    "FIELD_SET",
+                    "DATASET",
+                    "NONE"
+                  ],
+                  "symbolDocs": {
+                    "DATASET": " Indicates that this lineage is originating from upstream dataset(s)",
+                    "FIELD_SET": " Indicates that this lineage is originating from upstream field(s)",
+                    "NONE": " Indicates that there is no upstream lineage i.e. the downstream field is not a derived field"
+                  }
+                },
+                "doc": "The type of upstream entity"
+              },
+              {
+                "name": "upstreams",
+                "type": {
+                  "type": "array",
+                  "items": "com.linkedin.common.Urn"
+                },
+                "doc": "Upstream entities in the lineage",
+                "optional": true
+              },
+              {
+                "name": "downstreamType",
+                "type": {
+                  "type": "enum",
+                  "name": "FineGrainedLineageDownstreamType",
+                  "doc": "The type of downstream field(s) in a fine-grained lineage",
+                  "symbols": [
+                    "FIELD",
+                    "FIELD_SET"
+                  ],
+                  "symbolDocs": {
+                    "FIELD": " Indicates that the lineage is for a single, specific, downstream field",
+                    "FIELD_SET": " Indicates that the lineage is for a set of downstream fields"
+                  }
+                },
+                "doc": "The type of downstream field(s)"
+              },
+              {
+                "name": "downstreams",
+                "type": {
+                  "type": "array",
+                  "items": "com.linkedin.common.Urn"
+                },
+                "doc": "Downstream fields in the lineage",
+                "optional": true
+              },
+              {
+                "name": "transformOperation",
+                "type": "string",
+                "doc": "The transform operation applied to the upstream entities to produce the downstream field(s)",
+                "optional": true
+              },
+              {
+                "name": "confidenceScore",
+                "type": "float",
+                "doc": "The confidence in this lineage between 0 (low confidence) and 1 (high confidence)",
+                "default": 1
+              }
+            ]
+          }
+        },
+        "doc": " List of fine-grained lineage information, including field-level lineage",
+        "optional": true,
+        "Relationship": {
+          "/*/upstreams/*": {
+            "entityTypes": [
+              "dataset",
+              "schemaField"
+            ],
+            "name": "DownstreamOf"
+          }
+        }
+      }
+    ],
+    "Aspect": {
+      "name": "upstreamLineage"
+    }
+  },
+  {
+    "type": "record",
+    "name": "InstitutionalMemory",
+    "namespace": "com.linkedin.common",
+    "doc": "Institutional memory of an entity. This is a way to link to relevant documentation and provide description of the documentation. Institutional or tribal knowledge is very important for users to leverage the entity.",
+    "fields": [
+      {
+        "name": "elements",
+        "type": {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "InstitutionalMemoryMetadata",
+            "doc": "Metadata corresponding to a record of institutional memory.",
+            "fields": [
+              {
+                "name": "url",
+                "type": "Url",
+                "doc": "Link to an engineering design document or a wiki page."
+              },
+              {
+                "name": "description",
+                "type": "string",
+                "doc": "Description of the link."
+              },
+              {
+                "name": "createStamp",
+                "type": "AuditStamp",
+                "doc": "Audit stamp associated with creation of this record"
+              }
+            ]
+          }
+        },
+        "doc": "List of records that represent institutional memory of an entity. Each record consists of a link, description, creator and timestamps associated with that record."
+      }
+    ],
+    "Aspect": {
+      "name": "institutionalMemory"
+    }
+  },
+  {
+    "type": "record",
+    "name": "Status",
+    "namespace": "com.linkedin.common",
+    "doc": "The lifecycle status metadata of an entity, e.g. dataset, metric, feature, etc.\nThis aspect is used to represent soft deletes conventionally.",
+    "fields": [
+      {
+        "name": "removed",
+        "type": "boolean",
+        "doc": "Whether the entity has been removed (soft-deleted).",
+        "default": false,
+        "Searchable": {
+          "fieldType": "BOOLEAN"
+        }
+      }
+    ],
+    "Aspect": {
+      "name": "status"
+    }
+  },
+  {
+    "type": "record",
+    "name": "SchemaMetadata",
+    "namespace": "com.linkedin.schema",
+    "doc": "SchemaMetadata to describe metadata related to store schema",
+    "include": [
+      {
+        "type": "record",
+        "name": "SchemaMetadataKey",
+        "doc": "Key to retrieve schema metadata.",
+        "fields": [
+          {
+            "name": "schemaName",
+            "type": "string",
+            "doc": "Schema name e.g. PageViewEvent, identity.Profile, ams.account_management_tracking",
+            "validate": {
+              "strlen": {
+                "max": 500,
+                "min": 1
+              }
+            }
+          },
+          {
+            "name": "platform",
+            "type": {
+              "type": "typeref",
+              "name": "DataPlatformUrn",
+              "namespace": "com.linkedin.common",
+              "doc": "Standardized data platforms available",
+              "ref": "string",
+              "java": {
+                "class": "com.linkedin.common.urn.DataPlatformUrn"
+              },
+              "validate": {
+                "com.linkedin.common.validator.TypedUrnValidator": {
+                  "accessible": true,
+                  "constructable": true,
+                  "doc": "Standardized data platforms available",
+                  "entityType": "dataPlatform",
+                  "fields": [
+                    {
+                      "doc": "data platform name i.e. hdfs, oracle, espresso",
+                      "maxLength": 25,
+                      "name": "platformName",
+                      "type": "string"
+                    }
+                  ],
+                  "maxLength": 45,
+                  "name": "DataPlatform",
+                  "namespace": "li",
+                  "owners": [
+                    "urn:li:corpuser:fbar",
+                    "urn:li:corpuser:bfoo"
+                  ],
+                  "owningTeam": "urn:li:internalTeam:wherehows"
+                }
+              }
+            },
+            "doc": "Standardized platform urn where schema is defined. The data platform Urn (urn:li:platform:{platform_name})"
+          },
+          {
+            "name": "version",
+            "type": "long",
+            "doc": "Every change to SchemaMetadata in the resource results in a new version. Version is server assigned. This version is differ from platform native schema version."
+          }
+        ]
+      },
+      "com.linkedin.common.ChangeAuditStamps"
+    ],
+    "fields": [
+      {
+        "name": "dataset",
+        "type": "com.linkedin.common.DatasetUrn",
+        "doc": "Dataset this schema metadata is associated with.",
+        "optional": true
+      },
+      {
+        "name": "cluster",
+        "type": "string",
+        "doc": "The cluster this schema metadata resides from",
+        "optional": true
+      },
+      {
+        "name": "hash",
+        "type": "string",
+        "doc": "the SHA1 hash of the schema content"
+      },
+      {
+        "name": "platformSchema",
+        "type": [
+          {
+            "type": "record",
+            "name": "EspressoSchema",
+            "doc": "Schema text of an espresso table schema.",
+            "fields": [
+              {
+                "name": "documentSchema",
+                "type": "string",
+                "doc": "The native espresso document schema."
+              },
+              {
+                "name": "tableSchema",
+                "type": "string",
+                "doc": "The espresso table schema definition."
+              }
+            ]
+          },
+          {
+            "type": "record",
+            "name": "OracleDDL",
+            "doc": "Schema holder for oracle data definition language that describes an oracle table.",
+            "fields": [
+              {
+                "name": "tableSchema",
+                "type": "string",
+                "doc": "The native schema in the dataset's platform. This is a human readable (json blob) table schema."
+              }
+            ]
+          },
+          {
+            "type": "record",
+            "name": "MySqlDDL",
+            "doc": "Schema holder for MySql data definition language that describes an MySql table.",
+            "fields": [
+              {
+                "name": "tableSchema",
+                "type": "string",
+                "doc": "The native schema in the dataset's platform. This is a human readable (json blob) table schema."
+              }
+            ]
+          },
+          {
+            "type": "record",
+            "name": "PrestoDDL",
+            "doc": "Schema holder for presto data definition language that describes a presto view.",
+            "fields": [
+              {
+                "name": "rawSchema",
+                "type": "string",
+                "doc": "The raw schema in the dataset's platform. This includes the DDL and the columns extracted from DDL."
+              }
+            ]
+          },
+          {
+            "type": "record",
+            "name": "KafkaSchema",
+            "doc": "Schema holder for kafka schema.",
+            "fields": [
+              {
+                "name": "documentSchema",
+                "type": "string",
+                "doc": "The native kafka document schema. This is a human readable avro document schema."
+              },
+              {
+                "name": "keySchema",
+                "type": "string",
+                "doc": "The native kafka key schema as retrieved from Schema Registry",
+                "optional": true
+              }
+            ]
+          },
+          {
+            "type": "record",
+            "name": "BinaryJsonSchema",
+            "doc": "Schema text of binary JSON schema.",
+            "fields": [
+              {
+                "name": "schema",
+                "type": "string",
+                "doc": "The native schema text for binary JSON file format."
+              }
+            ]
+          },
+          {
+            "type": "record",
+            "name": "OrcSchema",
+            "doc": "Schema text of an ORC schema.",
+            "fields": [
+              {
+                "name": "schema",
+                "type": "string",
+                "doc": "The native schema for ORC file format."
+              }
+            ]
+          },
+          {
+            "type": "record",
+            "name": "Schemaless",
+            "doc": "The dataset has no specific schema associated with it",
+            "fields": []
+          },
+          {
+            "type": "record",
+            "name": "KeyValueSchema",
+            "doc": "Schema text of a key-value store schema.",
+            "fields": [
+              {
+                "name": "keySchema",
+                "type": "string",
+                "doc": "The raw schema for the key in the key-value store."
+              },
+              {
+                "name": "valueSchema",
+                "type": "string",
+                "doc": "The raw schema for the value in the key-value store."
+              }
+            ]
+          },
+          {
+            "type": "record",
+            "name": "OtherSchema",
+            "doc": "Schema holder for undefined schema types.",
+            "fields": [
+              {
+                "name": "rawSchema",
+                "type": "string",
+                "doc": "The native schema in the dataset's platform."
+              }
+            ]
+          }
+        ],
+        "doc": "The native schema in the dataset's platform."
+      },
+      {
+        "name": "fields",
+        "type": {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "SchemaField",
+            "doc": "SchemaField to describe metadata related to dataset schema.",
+            "fields": [
+              {
+                "name": "fieldPath",
+                "type": {
+                  "type": "typeref",
+                  "name": "SchemaFieldPath",
+                  "namespace": "com.linkedin.dataset",
+                  "doc": "Schema field path. TODO: Add formal documentation on normalization rules.",
+                  "ref": "string"
+                },
+                "doc": "Flattened name of the field. Field is computed from jsonPath field.",
+                "Searchable": {
+                  "fieldName": "fieldPaths",
+                  "fieldType": "TEXT"
+                }
+              },
+              {
+                "name": "jsonPath",
+                "type": "string",
+                "doc": "Flattened name of a field in JSON Path notation.",
+                "optional": true,
+                "Deprecated": true
+              },
+              {
+                "name": "nullable",
+                "type": "boolean",
+                "doc": "Indicates if this field is optional or nullable",
+                "default": false
+              },
+              {
+                "name": "description",
+                "type": "string",
+                "doc": "Description",
+                "optional": true,
+                "Searchable": {
+                  "boostScore": 0.1,
+                  "fieldName": "fieldDescriptions",
+                  "fieldType": "TEXT"
+                }
+              },
+              {
+                "name": "type",
+                "type": {
+                  "type": "record",
+                  "name": "SchemaFieldDataType",
+                  "doc": "Schema field data types",
+                  "fields": [
+                    {
+                      "name": "type",
+                      "type": [
+                        {
+                          "type": "record",
+                          "name": "BooleanType",
+                          "doc": "Boolean field type.",
+                          "fields": []
+                        },
+                        {
+                          "type": "record",
+                          "name": "FixedType",
+                          "doc": "Fixed field type.",
+                          "fields": []
+                        },
+                        {
+                          "type": "record",
+                          "name": "StringType",
+                          "doc": "String field type.",
+                          "fields": []
+                        },
+                        {
+                          "type": "record",
+                          "name": "BytesType",
+                          "doc": "Bytes field type.",
+                          "fields": []
+                        },
+                        {
+                          "type": "record",
+                          "name": "NumberType",
+                          "doc": "Number data type: long, integer, short, etc..",
+                          "fields": []
+                        },
+                        {
+                          "type": "record",
+                          "name": "DateType",
+                          "doc": "Date field type.",
+                          "fields": []
+                        },
+                        {
+                          "type": "record",
+                          "name": "TimeType",
+                          "doc": "Time field type. This should also be used for datetimes.",
+                          "fields": []
+                        },
+                        {
+                          "type": "record",
+                          "name": "EnumType",
+                          "doc": "Enum field type.",
+                          "fields": []
+                        },
+                        {
+                          "type": "record",
+                          "name": "NullType",
+                          "doc": "Null field type.",
+                          "fields": []
+                        },
+                        {
+                          "type": "record",
+                          "name": "MapType",
+                          "doc": "Map field type.",
+                          "fields": [
+                            {
+                              "name": "keyType",
+                              "type": "string",
+                              "doc": "Key type in a map",
+                              "optional": true
+                            },
+                            {
+                              "name": "valueType",
+                              "type": "string",
+                              "doc": "Type of the value in a map",
+                              "optional": true
+                            }
+                          ]
+                        },
+                        {
+                          "type": "record",
+                          "name": "ArrayType",
+                          "doc": "Array field type.",
+                          "fields": [
+                            {
+                              "name": "nestedType",
+                              "type": {
+                                "type": "array",
+                                "items": "string"
+                              },
+                              "doc": "List of types this array holds.",
+                              "optional": true
+                            }
+                          ]
+                        },
+                        {
+                          "type": "record",
+                          "name": "UnionType",
+                          "doc": "Union field type.",
+                          "fields": [
+                            {
+                              "name": "nestedTypes",
+                              "type": {
+                                "type": "array",
+                                "items": "string"
+                              },
+                              "doc": "List of types in union type.",
+                              "optional": true
+                            }
+                          ]
+                        },
+                        {
+                          "type": "record",
+                          "name": "RecordType",
+                          "doc": "Record field type.",
+                          "fields": []
+                        }
+                      ],
+                      "doc": "Data platform specific types"
+                    }
+                  ]
+                },
+                "doc": "Platform independent field type of the field."
+              },
+              {
+                "name": "nativeDataType",
+                "type": "string",
+                "doc": "The native type of the field in the dataset's platform as declared by platform schema."
+              },
+              {
+                "name": "recursive",
+                "type": "boolean",
+                "doc": "There are use cases when a field in type B references type A. A field in A references field of type B. In such cases, we will mark the first field as recursive.",
+                "default": false
+              },
+              {
+                "name": "globalTags",
+                "type": {
+                  "type": "record",
+                  "name": "GlobalTags",
+                  "namespace": "com.linkedin.common",
+                  "doc": "Tag aspect used for applying tags to an entity",
+                  "fields": [
+                    {
+                      "name": "tags",
+                      "type": {
+                        "type": "array",
+                        "items": {
+                          "type": "record",
+                          "name": "TagAssociation",
+                          "doc": "Properties of an applied tag. For now, just an Urn. In the future we can extend this with other properties, e.g.\npropagation parameters.",
+                          "fields": [
+                            {
+                              "name": "tag",
+                              "type": {
+                                "type": "typeref",
+                                "name": "TagUrn",
+                                "doc": "Globally defined tag",
+                                "ref": "string",
+                                "java": {
+                                  "class": "com.linkedin.common.urn.TagUrn"
+                                },
+                                "validate": {
+                                  "com.linkedin.common.validator.TypedUrnValidator": {
+                                    "accessible": true,
+                                    "constructable": true,
+                                    "doc": "Globally defined tags",
+                                    "entityType": "tag",
+                                    "fields": [
+                                      {
+                                        "doc": "tag name",
+                                        "maxLength": 200,
+                                        "name": "name",
+                                        "type": "string"
+                                      }
+                                    ],
+                                    "maxLength": 220,
+                                    "name": "Tag",
+                                    "namespace": "li",
+                                    "owners": [],
+                                    "owningTeam": "urn:li:internalTeam:datahub"
+                                  }
+                                }
+                              },
+                              "doc": "Urn of the applied tag",
+                              "Searchable": {
+                                "addToFilters": true,
+                                "fieldName": "tags",
+                                "fieldType": "URN",
+                                "filterNameOverride": "Tag",
+                                "hasValuesFieldName": "hasTags"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "doc": "Tags associated with a given entity"
+                    }
+                  ],
+                  "Aspect": {
+                    "name": "globalTags"
+                  }
+                },
+                "doc": "Tags associated with the field",
+                "optional": true,
+                "Searchable": {
+                  "/tags/*/tag": {
+                    "boostScore": 0.5,
+                    "fieldName": "fieldTags",
+                    "fieldType": "URN"
+                  }
+                }
+              },
+              {
+                "name": "glossaryTerms",
+                "type": {
+                  "type": "record",
+                  "name": "GlossaryTerms",
+                  "namespace": "com.linkedin.common",
+                  "doc": "Related business terms information",
+                  "fields": [
+                    {
+                      "name": "terms",
+                      "type": {
+                        "type": "array",
+                        "items": {
+                          "type": "record",
+                          "name": "GlossaryTermAssociation",
+                          "doc": "Properties of an applied glossary term.",
+                          "fields": [
+                            {
+                              "name": "urn",
+                              "type": {
+                                "type": "typeref",
+                                "name": "GlossaryTermUrn",
+                                "doc": "Business Term",
+                                "ref": "string",
+                                "java": {
+                                  "class": "com.linkedin.common.urn.GlossaryTermUrn"
+                                },
+                                "validate": {
+                                  "com.linkedin.common.validator.TypedUrnValidator": {
+                                    "accessible": true,
+                                    "constructable": true,
+                                    "doc": "business term",
+                                    "entityType": "glossaryTerm",
+                                    "fields": [
+                                      {
+                                        "doc": "The name of business term with hierarchy.",
+                                        "name": "name",
+                                        "type": "string"
+                                      }
+                                    ],
+                                    "maxLength": 56,
+                                    "name": "GlossaryTerm",
+                                    "namespace": "li",
+                                    "owners": [
+                                      "urn:li:corpuser:fbar",
+                                      "urn:li:corpuser:bfoo"
+                                    ],
+                                    "owningTeam": "urn:li:internalTeam:datahub"
+                                  }
+                                }
+                              },
+                              "doc": "Urn of the applied glossary term",
+                              "Searchable": {
+                                "addToFilters": true,
+                                "fieldName": "glossaryTerms",
+                                "fieldType": "URN",
+                                "filterNameOverride": "Glossary Term"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "doc": "The related business terms"
+                    },
+                    {
+                      "name": "auditStamp",
+                      "type": "AuditStamp",
+                      "doc": "Audit stamp containing who reported the related business term"
+                    }
+                  ],
+                  "Aspect": {
+                    "name": "glossaryTerms"
+                  }
+                },
+                "doc": "Glossary terms associated with the field",
+                "optional": true,
+                "Searchable": {
+                  "/terms/*/urn": {
+                    "boostScore": 0.5,
+                    "fieldName": "fieldGlossaryTerms",
+                    "fieldType": "URN"
+                  }
+                }
+              },
+              {
+                "name": "isPartOfKey",
+                "type": "boolean",
+                "doc": "For schema fields that are part of complex keys, set this field to true\nWe do this to easily distinguish between value and key fields",
+                "default": false
+              },
+              {
+                "name": "jsonProps",
+                "type": "string",
+                "doc": "For schema fields that have other properties that are not modeled explicitly,\nuse this field to serialize those properties into a JSON string",
+                "optional": true
+              }
+            ]
+          }
+        },
+        "doc": "Client provided a list of fields from document schema."
+      },
+      {
+        "name": "primaryKeys",
+        "type": {
+          "type": "array",
+          "items": "com.linkedin.dataset.SchemaFieldPath"
+        },
+        "doc": "Client provided list of fields that define primary keys to access record. Field order defines hierarchical espresso keys. Empty lists indicates absence of primary key access patter. Value is a SchemaField@fieldPath.",
+        "optional": true
+      },
+      {
+        "name": "foreignKeysSpecs",
+        "type": {
+          "type": "map",
+          "values": {
+            "type": "record",
+            "name": "ForeignKeySpec",
+            "doc": "Description of a foreign key in a schema.",
+            "fields": [
+              {
+                "name": "foreignKey",
+                "type": [
+                  {
+                    "type": "record",
+                    "name": "DatasetFieldForeignKey",
+                    "doc": "For non-urn based foregin keys.",
+                    "fields": [
+                      {
+                        "name": "parentDataset",
+                        "type": "com.linkedin.common.DatasetUrn",
+                        "doc": "dataset that stores the resource."
+                      },
+                      {
+                        "name": "currentFieldPaths",
+                        "type": {
+                          "type": "array",
+                          "items": "com.linkedin.dataset.SchemaFieldPath"
+                        },
+                        "doc": "List of fields in hosting(current) SchemaMetadata that conform a foreign key. List can contain a single entry or multiple entries if several entries in hosting schema conform a foreign key in a single parent dataset."
+                      },
+                      {
+                        "name": "parentField",
+                        "type": "com.linkedin.dataset.SchemaFieldPath",
+                        "doc": "SchemaField@fieldPath that uniquely identify field in parent dataset that this field references."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "record",
+                    "name": "UrnForeignKey",
+                    "doc": "If SchemaMetadata fields make any external references and references are of type com.linkedin.common.Urn or any children, this models can be used to mark it.",
+                    "fields": [
+                      {
+                        "name": "currentFieldPath",
+                        "type": "com.linkedin.dataset.SchemaFieldPath",
+                        "doc": "Field in hosting(current) SchemaMetadata."
+                      }
+                    ]
+                  }
+                ],
+                "doc": "Foreign key definition in metadata schema."
+              }
+            ]
+          }
+        },
+        "doc": "Map captures all the references schema makes to external datasets. Map key is ForeignKeySpecName typeref.",
+        "optional": true,
+        "deprecated": "Use foreignKeys instead."
+      },
+      {
+        "name": "foreignKeys",
+        "type": {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "ForeignKeyConstraint",
+            "doc": "Description of a foreign key constraint in a schema.",
+            "fields": [
+              {
+                "name": "name",
+                "type": "string",
+                "doc": "Name of the constraint, likely provided from the source"
+              },
+              {
+                "name": "foreignFields",
+                "type": {
+                  "type": "array",
+                  "items": "com.linkedin.common.Urn"
+                },
+                "doc": "Fields the constraint maps to on the foreign dataset",
+                "Relationship": {
+                  "/*": {
+                    "entityTypes": [
+                      "schemaField"
+                    ],
+                    "name": "ForeignKeyTo"
+                  }
+                }
+              },
+              {
+                "name": "sourceFields",
+                "type": {
+                  "type": "array",
+                  "items": "com.linkedin.common.Urn"
+                },
+                "doc": "Fields the constraint maps to on the source dataset"
+              },
+              {
+                "name": "foreignDataset",
+                "type": "com.linkedin.common.Urn",
+                "doc": "Reference to the foreign dataset for ease of lookup",
+                "Relationship": {
+                  "entityTypes": [
+                    "dataset"
+                  ],
+                  "name": "ForeignKeyToDataset"
+                }
+              }
+            ]
+          }
+        },
+        "doc": "List of foreign key constraints for the schema",
+        "optional": true
+      }
+    ],
+    "Aspect": {
+      "name": "schemaMetadata"
+    }
+  },
+  {
+    "type": "record",
+    "name": "EditableSchemaMetadata",
+    "namespace": "com.linkedin.schema",
+    "doc": "EditableSchemaMetadata stores editable changes made to schema metadata. This separates changes made from\ningestion pipelines and edits in the UI to avoid accidental overwrites of user-provided data by ingestion pipelines.",
+    "include": [
+      "com.linkedin.common.ChangeAuditStamps"
+    ],
+    "fields": [
+      {
+        "name": "editableSchemaFieldInfo",
+        "type": {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "EditableSchemaFieldInfo",
+            "doc": "SchemaField to describe metadata related to dataset schema.",
+            "fields": [
+              {
+                "name": "fieldPath",
+                "type": "string",
+                "doc": "FieldPath uniquely identifying the SchemaField this metadata is associated with"
+              },
+              {
+                "name": "description",
+                "type": "string",
+                "doc": "Description",
+                "optional": true,
+                "Searchable": {
+                  "boostScore": 0.1,
+                  "fieldName": "editedFieldDescriptions",
+                  "fieldType": "TEXT"
+                }
+              },
+              {
+                "name": "globalTags",
+                "type": "com.linkedin.common.GlobalTags",
+                "doc": "Tags associated with the field",
+                "optional": true,
+                "Searchable": {
+                  "/tags/*/tag": {
+                    "boostScore": 0.5,
+                    "fieldName": "editedFieldTags",
+                    "fieldType": "URN"
+                  }
+                }
+              },
+              {
+                "name": "glossaryTerms",
+                "type": "com.linkedin.common.GlossaryTerms",
+                "doc": "Glossary terms associated with the field",
+                "optional": true,
+                "Searchable": {
+                  "/terms/*/urn": {
+                    "boostScore": 0.5,
+                    "fieldName": "editedFieldGlossaryTerms",
+                    "fieldType": "URN"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "doc": "Client provided a list of fields from document schema."
+      }
+    ],
+    "Aspect": {
+      "name": "editableSchemaMetadata"
+    }
+  },
+  "com.linkedin.common.GlobalTags",
+  "com.linkedin.common.GlossaryTerms",
+  {
+    "type": "record",
+    "name": "BrowsePaths",
+    "namespace": "com.linkedin.common",
+    "doc": "Shared aspect containing Browse Paths to be indexed for an entity.",
+    "fields": [
+      {
+        "name": "paths",
+        "type": {
+          "type": "array",
+          "items": "string"
+        },
+        "doc": "A list of valid browse paths for the entity.\n\nBrowse paths are expected to be backslash-separated strings. For example: 'prod/snowflake/datasetName'",
+        "Searchable": {
+          "/*": {
+            "fieldName": "browsePaths",
+            "fieldType": "BROWSE_PATH"
+          }
+        }
+      }
+    ],
+    "Aspect": {
+      "name": "browsePaths"
+    }
+  },
+  {
+    "type": "record",
+    "name": "DataPlatformInstance",
+    "namespace": "com.linkedin.common",
+    "doc": "The specific instance of the data platform that this entity belongs to",
+    "fields": [
+      {
+        "name": "platform",
+        "type": "Urn",
+        "doc": "Data Platform",
+        "Searchable": {
+          "addToFilters": true,
+          "fieldType": "URN",
+          "filterNameOverride": "Platform"
+        }
+      },
+      {
+        "name": "instance",
+        "type": "Urn",
+        "doc": "Instance of the data platform (e.g. db instance)",
+        "optional": true,
+        "Searchable": {
+          "fieldName": "platformInstance",
+          "fieldType": "URN"
+        }
+      }
+    ],
+    "Aspect": {
+      "name": "dataPlatformInstance"
+    }
+  },
+  {
+    "type": "record",
+    "name": "ViewProperties",
+    "namespace": "com.linkedin.dataset",
+    "doc": "Details about a View. \ne.g. Gets activated when subTypes is view",
+    "fields": [
+      {
+        "name": "materialized",
+        "type": "boolean",
+        "doc": "Whether the view is materialized",
+        "Searchable": {
+          "fieldType": "BOOLEAN",
+          "weightsPerFieldValue": {
+            "true": 0.5
+          }
+        }
+      },
+      {
+        "name": "viewLogic",
+        "type": "string",
+        "doc": "The view logic"
+      },
+      {
+        "name": "viewLanguage",
+        "type": "string",
+        "doc": "The view logic language / dialect"
+      }
+    ],
+    "Aspect": {
+      "name": "viewProperties"
+    }
+  }
+]

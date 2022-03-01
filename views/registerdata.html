@@ -15,6 +15,8 @@
         var meta = 5;
         $(document).ready(function () {
 
+
+
             $('#metadataform').submit(function (event) {
 
                 $.ajax({
@@ -115,7 +117,6 @@
                         meta = data;
                         renderFields(data['fields']);
                         $('#metadata_status').html('<button class="contrast">Schema Applied</button>');
-                        $('#navigation').html('<p><a href="/register/classifydata/'+data['dataset_id']+'">Register Data Classification Indicators</a></p>');
                     }
 
                 });
@@ -123,27 +124,58 @@
 
             });
 
+            
 
-            $('#security-link').click(function(){
-                window.location.href = "/security.html";
-            })
+            $('#partition-btn').hide();
+            $('#partition-btn').on('click', function(event){
+                console.log('Sample');
+                SubmitParitions();
+                event.preventDefault();
+            });
 
         });
 
+        function SubmitParitions(){
+            var primaryKeys = [];
+                $("input:checkbox[name='pk']:checked").each(function(){    
+                    primaryKeys.push( parseInt($(this).val()));    		
+                });
+
+                $.ajax({
+                    url: '/register/partitions',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        "partition_path" : parseInt($('input[name="partition_path"]:checked').val()),
+                        "primary_keys": primaryKeys,
+                        "dataset_id": parseInt(meta['dataset_id']),
+                    }),
+                    processData: false,
+                    success: function (data, textStatus, jqXHR) {
+                        console.log(data);
+                        meta = data;
+                        $('#metadata_status').html('<button class="contrast">Schema Applied</button>');
+                        $('#navigation').html('<p><a href="/register/classifydata/'+data['dataset_id']+'">Register Data Classification Indicators</a></p>');
+                    }
+
+                });
+        }
+
 
         function renderFields(srcData) {
-
-            var tblHead = '<br/><table id="schema_table" role="grid"> <thead> <tr> <th scope="col">Field Name</th><th scope="col">Type</th><th scope="col">Description</th></tr> </thead>';
+            var tblHead = '<br/><table id="schema_table" role="grid"> <thead> <tr> <th scope="col">Field Name</th><th scope="col">Type</th><th scope="col">Description</th><th>Primary Key Field</th><th>Partition Path</th></tr> </thead>';
             var tblBody = '<tbody>';
             var fields = srcData['data']
             for (let index = 0; index < fields.length; index++) {
                 element = fields[index];
-                eachRow = '<tr><td>' + element["name"] + '</td><td>' + element["type"] + '</td><td>' + element["doc"] + '</td></tr>';
+                eachRow = '<tr><td>' + element["name"] + '</td><td>' + element["type"] + '</td><td>' + element["doc"] + '</td> <td><input type="checkbox" name="pk" id="pk_'+element["field_id"]+'"  value="'+element["field_id"]+'"  ></td>  <td> <input type="radio" name="partition_path" id="pp_'+element["field_id"]+'" value="'+element["field_id"]+'" > </td></tr>';
                 tblBody += eachRow;
             }
             tblBody += '</tbody></table><br/>';
-            $('#schema_section').html(tblHead + tblBody);
-
+            button = '<br/><br/>';
+            $('#schema_section').html(tblHead + tblBody  + button);
+            $
+            $('#partition-btn').show();
         }
 
 
@@ -268,9 +300,14 @@
                         <input id="schema-submit" type="submit" value="Submit">
                     </form>
 
+                    
+                </div>
+                <div>
+                    <button id="partition-btn">Save Schema</button>
                 </div>
 
             </details>            
+
 
         </section><!-- ./ Accordions -->
 

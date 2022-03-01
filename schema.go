@@ -70,6 +70,8 @@ func (a *App) constructRegistryResponseObject(schemaRequest *SchemaRequest, file
 	var fields AvroExtractResponse
 	var failureResponse ErrorResponse
 
+	fields.Fields = schemaRequest.Fields
+
 	response.DatasetID = schemaRequest.CatalogDatasetID
 	response.Headers = []string{"--header 'Accept: application/vnd.kafka.v2+json, application/vnd.kafka+json, application/json'", "--header 'Content-Type: application/vnd.kafka.avro.v2+json'"}
 	response.URL = fmt.Sprintf("http://restproxy/9082/topics/%s", schemaRequest.DatasetName)
@@ -146,6 +148,7 @@ func (a *App) saveSchemaReferenceToDB(schemaRequest *SchemaRequest, status strin
 
 	for k, v := range schemaRequest.Fields {
 		_, err = tx.Exec("insert into datacatalog.public.fields(dataset_id, field_id, name, description, types) VALUES($1, $2, $3, $4, $5) on conflict do nothing", schemaRequest.CatalogDatasetID, k, v.Name, v.Doc, v.Type)
+		schemaRequest.Fields[k].FieldID = int64(k)
 		if err != nil {
 			return err
 		}
