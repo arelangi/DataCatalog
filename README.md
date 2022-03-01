@@ -175,10 +175,12 @@ curl 'http://localhost:8080/entities?action=ingest' -X POST --data '{
 ```
 
 
-### Delete the dataset
+### Retrieve the dataset
 
 ```
-curl  'http://localhost:8080/entities/urn:li:dataset:(urn:li:dataPlatform:fooe,User7,PROD)'
+curl  'http://localhost:8080/entities/urn:li:dataset:(urn:li:dataPlatform:fooe,User,PROD)'
+
+
 ```
 
 
