@@ -35,7 +35,7 @@ func (a *App) saveDataQualityRulestoDB(r DQRequest) (err error) {
 		return
 	}
 	for _, v := range r.Rules {
-		_, err = tx.Exec("INSERT into datacatalog.public.dataquality(dataset_id, description, type, values ) VALUES ($1, $2, $3, $4) on conflict do nothing", r.DatasetID, v.Description, v.RuleType, v.Values)
+		_, err = tx.Exec("INSERT into datacatalog.public.dataquality(dataset_id, description, type, values, field_name) VALUES ($1, $2, $3, $4, $5) on conflict do nothing", r.DatasetID, v.Description, v.RuleType, v.Values, v.FieldName)
 		if err != nil {
 			return
 		}
@@ -60,4 +60,31 @@ type DQRule struct {
 	FieldName   string `json:"field_name"`
 	RuleType    string `json:"rule_type"`
 	Values      string `json:"values"`
+}
+
+func (a *App) getDataQualityRulesByID(id int64) (dataset DQRequest, err error) {
+	rows, err := a.DB.Query("select field_name, type, description, values from datacatalog.public.dataquality where dataset_id=$1", id)
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var r DQRule
+		err = rows.Scan(&r.FieldName, &r.RuleType, &r.Description, &r.Values)
+		if err != nil {
+			return
+		}
+
+		dataset.Rules = append(dataset.Rules, r)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return
+	}
+	dataset.DatasetID = id
+	fmt.Println(dataset)
+
+	return
 }

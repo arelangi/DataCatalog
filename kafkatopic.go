@@ -60,3 +60,46 @@ type KafkaTopicFailureMsg struct {
 	ErrorCode string `json:"error_code"`
 	Message   string `json:"message"`
 }
+
+type PartitionDataset struct {
+	DatasetName   string
+	PrimaryKeys   []string
+	PartitionPath string
+}
+
+type ClusterResponse struct {
+	Data []struct {
+		Acls struct {
+			Related string `json:"related"`
+		} `json:"acls"`
+		BrokerConfigs struct {
+			Related string `json:"related"`
+		} `json:"broker_configs"`
+		Brokers struct {
+			Related string `json:"related"`
+		} `json:"brokers"`
+		ClusterID      string `json:"cluster_id"`
+		ConsumerGroups struct {
+			Related string `json:"related"`
+		} `json:"consumer_groups"`
+		Controller struct {
+			Related string `json:"related"`
+		} `json:"controller"`
+		Kind     string `json:"kind"`
+		Metadata struct {
+			ResourceName string `json:"resource_name"`
+			Self         string `json:"self"`
+		} `json:"metadata"`
+		PartitionReassignments struct {
+			Related string `json:"related"`
+		} `json:"partition_reassignments"`
+		Topics struct {
+			Related string `json:"related"`
+		} `json:"topics"`
+	} `json:"data"`
+	Kind     string `json:"kind"`
+	Metadata struct {
+		Next interface{} `json:"next"`
+		Self string      `json:"self"`
+	} `json:"metadata"`
+}

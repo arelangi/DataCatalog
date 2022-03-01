@@ -18,84 +18,34 @@
     <script type="text/javascript" src="//cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"> </script>
 
     <script>
-        var counter = 0;
+
         $(document).ready(function () {
-
-            var tbl = $('#quality_tbl').DataTable();
-            $('#addRow').on('click',function(){
-                tbl.row.add([
-                '<div id="div_field_name_'+counter+'"><select id="field_name_'+counter+'" name="field_name_'+counter+'">{{range .payload.Fields}}<option value="{{ .Name }}"> {{ .Name }} </option>{{ end }}</select></div>',
-                '<div id="div_rule_type_'+counter+'"><select id="rule_type_'+counter+'" name="rule_type_'+counter+'" required><option value="Range">Range</option><option value="Valid Values">Valid Values</option></select></div>',
-                '<div id="div_description_'+counter+'"><input type="text" id="description_'+counter+'" name="description_'+counter+'" placeholder="Rule Description" aria-label="Rule Description" required></div>',
-                '<div id="div_values_'+counter+'"><input type="text" id="values_'+counter+'" name="values_'+counter+'" placeholder="Comma separated values" aria-label="Comma separated values" required></div>'
-                ]).draw(false);
-
-                counter++;
-            });
-
-
-            $('#dataqualityrules-btn').on( 'click', function(event) {
-                var  data = tbl.$('input, select').serialize();
-                
-                postData = {
-                    "dataset_id": parseInt($('#datasetid').val()),
-                    "rules": createJSONBody()
-                }
-                
-                
-                
+            $('#es-sink-btn').on('click',function (event) {
                 $.ajax({
-                    url: '/register/quality',
+                    url: '/register/sinks/elasticsearch/{{ .payload.DatasetID }}',
                     dataType: 'json',
                     type: 'POST',
                     contentType: 'application/json',
                     accept: {
                         json: 'application/json'
                     },
-                    data: JSON.stringify(postData),
+                    data: JSON.stringify({
+                        "ignore_key":$('#es_ignore_key').val(),
+                        "ignore_schema": $('#es_ignore_schema').val(),
+                    }),
                     processData: false,
                     success: function (data, textStatus, jQxhr) {
-                        for (var k in data['rules']){
-                            $('#div_field_name_'+k).html('<p>'+data['rules'][k].field_name+'</p>');
-                            $('#div_rule_type_'+k).html('<p>'+data['rules'][k].rule_type+'</p>');
-                            $('#div_description_'+k).html('<p>'+data['rules'][k].description+'</p>');
-                            $('#div_values_'+k).html('<p>'+data['rules'][k].values+'</p>');
-                        }
-
-                        alert('Submitted for approval');
-                        $('#dataqualityrules-btn').remove();
-                        $('#navigation1').html('<p><a href="/register/sinks/{{ .payload.DatasetID }}">Add Sinks</a></p>');
-                        $('#navigation2').html('<button id="approval-btn">Submit For Approval</button>');
-                        
+                        alert('Success');
+                        console.log(data);
+                        $('#es-sink-status').html('<br/><br/><h4>Sink Configuration Saved</h4><br/>');
                     },
                     error: function (jqXhr, textStatus, errorThrown) {
                         console.log(errorThrown);
                     }
                 });
-                
-
-                event.preventDefault();
             });
 
-
-            function createJSONBody(){
-                table_length = $('#quality_tbl tbody tr').length;
-                let rules = new Array(); 
-                for (var i =0; i< table_length; i++) {
-                    let thisObj = {
-                        "field_name": $('#field_name_'+i).val(), 
-                        "rule_type": $('#rule_type_'+i).val(),
-                        "description": $('#description_'+i).val(),
-                        "values": $('#values_'+i).val()
-                    };
-                    rules.push(thisObj);
-                }
-                return rules;
-            }
-
         });
-
-
 
     </script>
 </head>
@@ -105,53 +55,99 @@
     <!-- Header -->
     <header class="container">
         <hgroup>
-            <h1>Data Quality Rules</h1>
+            <h1>Add Sinks</h1>
+            <p>Configure infrastructure and pipelines to land the data automatically to different sinks.Data automatically lands in Datahub and does not need any configuration</p>
         </hgroup>
     </header><!-- ./ Header -->
 
     <!-- Main -->
     <main class="container">
-        <div id="dataqualityrules_section">
+        <!-- Accordions -->
+        <section id="accordions">
+            <h2>Sinks</h2>
+            <details>
+                <summary>Elasticsearch</summary>
+                <div id="es-section">
+                    <br /><br />
+                    
+                        <label>Ignore Key?</label>
+                        <select id="es_ignore_key" name="es_ignore_key" required>
+                            <option value="true">Yes</option>
+                            <option value="false" selected>No</option>
+                        </select>
+                        <label>Ignore Schema?</label>
+                        <select id="es_ignore_schema" name="es_ignore_schema" required>
+                            <option value="true">Yes</option>
+                            <option value="false" selected>No</option>
+                        </select>
+                        <button id="es-sink-btn">Submit</button>
+                    
+                </div>
+                <div id="es-sink-status">
+                </div>
+            </details>
 
-        <br/>
-        <div class="grid">
-            <button id="addRow" style="width:15%" >Add new row</button>
-        </div>
-        <table id="quality_tbl" class="display" role="grid">
-                <thead>
-                    <tr>
-                        
-                        <th scope="col"> Field Name </th>
-                        <th scope="col"> Rule Type </th>
-                        <th scope="col"> Rule Description </th>
-                        <th scope="col"> Values </th>
-                    </tr>
-                </thead>
-                <tbody>
-               
-                
+            <details>
+                <summary>Postgres</summary>
+                <div id="postgres_section">
+                    <br /><br />
+                    <form id="postgres-form">
+                        <input type="text" id="pg_host_name" name="HostName" placeholder="HostName" aria-label="HostName">
+                        <input type="text" id="pg_database_name" name="DatabaseName" placeholder="DatabaseName"
+                            aria-label="DatabaseName">
+                        <input type="text" id="pg_schema_name" name="SchemaName" placeholder="SchemaName"
+                            aria-label="SchemaName">
+                            <input type="number" id="pg_port" name="Port" placeholder="Port" aria-label="Port">
+                        <input id="postgres-submit" type="submit" value="Sink to Postgres">
+                    </form>
+                </div>
+                <div id="postgres-sink-status">
+                </div>
+            </details>
 
-                </tbody>
-                </table>
-                <input id="datasetid"  type="hidden" name="datasetid" value="{{ .payload.DatasetID }}">
-                <button type="submit" id="dataqualityrules-btn">Submit</button>
-            
-        </div>
-        <br/><br/>
-        <br/><br/>
-        <div class="grid" id="navigation1">
-        </div>
-            
-        
-        <br/><br/>
-        <br/><br/>
-        <div class="grid" id="navigation2">
-            
-        </div>
+            <details>
+                <summary>MySQL</summary>
+                <div id="mysql_section">
+                    <br /><br />
+                    <form id="mysql-form">
+                        <input type="text" id="mysql_host_name" name="HostName" placeholder="HostName" aria-label="HostName">
+                        <input type="text" id="mysql_database_name" name="DatabaseName" placeholder="DatabaseName"
+                            aria-label="DatabaseName">
+                        <input type="number" id="mysql_port" name="Port" placeholder="Port" aria-label="Port">
+                        <input id="mysql-submit" type="submit" value="Sink to MySQL">
+                    </form>
+                </div>
+                <div id="mysql-sink-status">
+                </div>
+            </details>
 
-            
+            <details>
+                <summary>Cassandra</summary>
+                <div id="cassandra_section">
+                    <br /><br />
+                    <h2>WIP</h2>
+                    <br /><br />
+                </div>
+                <div id="cassandra-sink-status">
+                </div>
+            </details>
 
-        
+            <details>
+                <summary>BigQuery</summary>
+                <div id="schema_section">
+                    <br /><br />
+                    <h2>WIP</h2>
+                    <br /><br />
+                </div>
+                <div id="cassandra-sink-status">
+                </div>
+            </details>
+
+        </section><!-- ./ Accordions -->
+
+        <div class="grid" id="navigation">
+           <a href="/register/review/{{ .payload.DatasetID }}">Submit Registration for Approval</a>
+        </div>
 
     </main><!-- ./ Main -->
 
