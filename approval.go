@@ -77,6 +77,15 @@ func (a *App) approveDatasetHandler() gin.HandlerFunc {
 			return
 		}
 
+		//Add ElasticSearch Sink
+		err = a.addElasticSearchSinkByName(partitionDetails.DatasetName)
+		if err != nil {
+			fmt.Println("Failed to add ElasticSearch Sink:", err)
+			panic(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"status": "Failure", "message": err.Error()})
+			return
+		}
+
 		//Get the Kafka Cluster Info
 		c.JSON(http.StatusOK, gin.H{"status": "Approved"})
 	}
