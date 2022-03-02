@@ -1,19 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
-
-func (a *App) getMetadata(datasetID int64, m *MetadataRequest) (err error) {
-	err = a.DB.QueryRow("SELECT  dataset_name,  dataset_logical_name,  dataset_description,  dataset_type,  dataset_source,  dataset_share,  dataset_retention,  dataset_retention_justification,  dataset_arrival_frequency, organization,product,team,data_steward,platform_name, data_classification FROM datacatalog.public.metadata where dataset_id =$1", datasetID).Scan(&m.DatasetName, &m.DatasetLogicalName, &m.DatasetDescription, &m.DatasetType, &m.DatasetSource, &m.DatasetShare, &m.DatasetRetention, &m.DatasetRetentionJustification, &m.DatasetArrivalFrequency, &m.Organization, &m.Product, &m.Team, &m.DataSteward, &m.PlatformName, &m.DataClassiffication)
-	return
-}
 
 func (a *App) approveDataset(datasetID int64) (err error) {
 	_, err = a.DB.Exec("UPDATE datacatalog.public.metadata set datasteward_approved=true where dataset_id=$1", datasetID)
@@ -32,7 +25,7 @@ func (a *App) getDatasetName(id int64) (datasetName string) {
 	2. Submit a Spark Submit job to GoSparkServer with the corresponding topic
 	3. Submit a Hive sync job
 	4. Submit to sinks
-	4. Register the downstream dataset to the catalog
+	5. Register everything to datahub
 */
 func (a *App) approveDatasetHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -86,35 +79,18 @@ func (a *App) approveDatasetHandler() gin.HandlerFunc {
 			return
 		}
 
+		//Register to Datahub
+		err = a.RegisterDatasetToDatahub(catalogDatasetID)
+		if err != nil {
+			fmt.Println("Failed to register to Datahub:", err)
+			panic(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"status": "Failure", "message": err.Error()})
+			return
+		}
+
 		//Get the Kafka Cluster Info
 		c.JSON(http.StatusOK, gin.H{"status": "Approved"})
 	}
-}
-
-func (a *App) getKafkaClusterID() string {
-	var clusterResponse ClusterResponse
-	resp, err := http.Get("http://127.0.0.1:9082/v3/clusters")
-	if err != nil {
-		fmt.Println(err)
-		panic(err)
-	}
-	defer resp.Body.Close()
-
-	jsonDataFromHttp, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println(err)
-		panic(err)
-	}
-
-	err = json.Unmarshal([]byte(jsonDataFromHttp), &clusterResponse)
-	if err != nil {
-		fmt.Println(err)
-		panic(err)
-	}
-
-	fmt.Println("fucket ID is ", clusterResponse.Data[0].ClusterID)
-
-	return clusterResponse.Data[0].ClusterID
 }
 
 func (a *App) getPartitionDetailsForDataset(id int64) (resp PartitionDataset, err error) {

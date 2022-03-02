@@ -46,6 +46,9 @@ func (a *App) initializeRoutes() {
 
 		//Handle the POST requests at /register/sinks/elasticsearch
 		registerRoutes.POST("/sinks/elasticsearch/:dataset_id", a.registerElasticSearchSinksHandler())
+
+		//Register to datahub
+		registerRoutes.POST("/datahub/:dataset_id", a.registerDatahubHandler())
 	}
 
 	dataStewardRoutes := a.Engine.Group("/ds")

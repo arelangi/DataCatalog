@@ -58,7 +58,7 @@ func (a *App) addElasticSearchSinkByName(datasetName string) (err error) {
 		},
 	}
 
-	url := "http://elasticsearch:8083/connectors"
+	url := "http://kafkaconnect:8083/connectors"
 	headersMap := map[string]string{
 		"Content-Type": "application/json",
 	}

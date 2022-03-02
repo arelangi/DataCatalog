@@ -1,6 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+)
 
 type KafkaTopicPayload struct {
 	TopicName         string              `json:"topic_name"`
@@ -32,6 +37,32 @@ func (a *App) createKafkaTopic(payload KafkaTopicPayload, clusterID string) (err
 	fmt.Println("error when registering topic is ", err)
 
 	return
+}
+
+func (a *App) getKafkaClusterID() string {
+	var clusterResponse ClusterResponse
+	resp, err := http.Get("http://127.0.0.1:9082/v3/clusters")
+	if err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	jsonDataFromHttp, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
+
+	err = json.Unmarshal([]byte(jsonDataFromHttp), &clusterResponse)
+	if err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
+
+	fmt.Println("fucket ID is ", clusterResponse.Data[0].ClusterID)
+
+	return clusterResponse.Data[0].ClusterID
 }
 
 type KafkaTopicSuccessMsg struct {
