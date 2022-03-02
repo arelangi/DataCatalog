@@ -95,7 +95,6 @@
                     <br /><br />
                     
                     <table id="classification_tbl" role="grid">
-                        <form id="dataclassificationform">
                             <thead>
                                 <tr>
                                     <th scope="col"> ID</th>
@@ -103,6 +102,8 @@
                                     <th scope="col"> Description</th>
                                     <th scope="col"> Type </th>
                                     <th scope="col"> Classification</th>
+                                    <th scope="col"> Is Primary Key?</th>
+                                    <th scope="col"> Is Partition Path?</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -120,8 +121,14 @@
                                 <td id="td_type_{{.FieldID}}">  
                                     <p> {{ .Type }}</p>
                                 </td>
-                                <td id="td_type_{{.FieldID}}">  
+                                <td id="td_classification_{{.FieldID}}">  
                                     <p> {{ .Classification }}</p>
+                                </td>
+                                <td id="td_pk_{{.FieldID}}">  
+                                    <p> {{ .PrimaryKeyField }}</p>
+                                </td>
+                                <td id="td_partitionpath_{{.FieldID}}">  
+                                    <p> {{ .PartitionField }}</p>
                                 </td>
                             </tr>
                             {{ end }}
@@ -130,8 +137,66 @@
                     </table>
 
                 </div>
-
             </details>            
+
+            <details>
+                <summary>Data Quality Rules</summary>
+                <div id="dq_section">
+                    <br /><br />
+                    
+                    <table id="dq_rules_tbl" role="grid">
+                            <thead>
+                                <tr>
+                                    <th scope="col"> Field Name</th>
+                                    <th scope="col"> Rule Type </th>
+                                    <th scope="col"> Rule Description</th>
+                                    <th scope="col">Values</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {{range .dq.Rules}}
+                            <tr>
+                                <td> 
+                                    <p>{{ .FieldName }}</p>
+                                </td> 
+                                <td> 
+                                    <p> {{ .RuleType }} </p> 
+                                </td> 
+                                <td>
+                                    <p> {{ .Description }}</p>
+                                </td>
+                                <td>  
+                                    <p> {{ .Values }}</p>
+                                </td>
+                            </tr>
+                            {{ end }}
+                            </tbody>
+                    </table>
+                </div>
+            </details>
+
+            <details>
+                <summary>Sinks</summary>
+                <div id="sinks_section">
+                    <br/><br/>
+                    <table id="sinks_tbl" role="grid">
+                        <thead>
+                            <th scope="col">Sink</th>
+                        </thead>
+                        <tbody>
+                            {{ range .sink.SinkValues }}
+                            <tr>
+                                <td>
+                                    <p>
+                                        {{ .SinkName  }}
+                                    </p>
+                                </td>
+                            </tr>
+                            {{ end }}
+                        </tbody>
+                    </table>
+                </div>
+            </details>
 
         </section><!-- ./ Accordions -->
 

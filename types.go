@@ -75,11 +75,13 @@ type AvroExtractResponse struct {
 }
 
 type Field struct {
-	Doc            string `json:"doc"`
-	Name           string `json:"name"`
-	Type           string `json:"type"`
-	Classification string `json:"classification"`
-	FieldID        int64  `json:"field_id"`
+	Doc             string `json:"doc"`
+	Name            string `json:"name"`
+	Type            string `json:"type"`
+	Classification  string `json:"classification"`
+	FieldID         int64  `json:"field_id"`
+	PrimaryKeyField bool   `json:"primary_key_field"`
+	PartitionField  bool   `json:"partition_field"`
 }
 
 type Dataset struct {

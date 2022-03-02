@@ -31,7 +31,7 @@ func (a *App) getDatasetByID(id int64) (dataset Dataset, err error) {
 }
 
 func (a *App) getCompleteDatasetByID(id int64) (dataset Dataset, err error) {
-	rows, err := a.DB.Query("select field_id, name, description, types, classification from datacatalog.public.fields where dataset_id =$1;", id)
+	rows, err := a.DB.Query("select field_id, name, description, types, classification,primarykeyfield, partitionfield from datacatalog.public.fields where dataset_id =$1;", id)
 	if err != nil {
 		return
 	}
@@ -39,7 +39,7 @@ func (a *App) getCompleteDatasetByID(id int64) (dataset Dataset, err error) {
 
 	for rows.Next() {
 		var field Field
-		err = rows.Scan(&field.FieldID, &field.Name, &field.Doc, &field.Type, &field.Classification)
+		err = rows.Scan(&field.FieldID, &field.Name, &field.Doc, &field.Type, &field.Classification, &field.PrimaryKeyField, &field.PartitionField)
 		if err != nil {
 			return
 		}
@@ -55,5 +55,4 @@ func (a *App) getCompleteDatasetByID(id int64) (dataset Dataset, err error) {
 	fmt.Println(dataset)
 
 	return
-
 }

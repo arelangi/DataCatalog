@@ -25,6 +25,8 @@ func (a *App) initializeRoutes() {
 		registerRoutes.GET("/start", a.showRegisterPage())
 		registerRoutes.GET("/classifydata/:dataset_id", a.showDataClassificationPage())
 		registerRoutes.GET("/dataquality/:dataset_id", a.showDataQualityPage())
+		registerRoutes.GET("/addsinks/:dataset_id", a.showSinksPage())
+		registerRoutes.GET("/review/:dataset_id", a.showReviewPage())
 
 		//API Calls
 		//Handle the POST requests at /register/metadata
@@ -42,14 +44,17 @@ func (a *App) initializeRoutes() {
 		//Handle the POST request at /register/quality
 		registerRoutes.POST("/quality", a.dataQualityHandler())
 
-		//Handle the POST requests at /register/lineage
-		registerRoutes.POST("/lineage", a.registerLineageHandler())
+		//Handle the POST requests at /register/sinks/elasticsearch
+		registerRoutes.POST("/sinks/elasticsearch/:dataset_id", a.registerElasticSearchSinksHandler())
+
+		//Register to datahub
+		registerRoutes.POST("/datahub/:dataset_id", a.registerDatahubHandler())
 	}
 
 	dataStewardRoutes := a.Engine.Group("/ds")
 	{
 		//Page rendering
-		dataStewardRoutes.GET("/review/:dataset_id", a.showReviewPage())
+		dataStewardRoutes.GET("/review/:dataset_id", a.showApprovalPage())
 
 		//Handle the data steward approval
 		dataStewardRoutes.GET("/approval/:dataset_id", a.approveDatasetHandler())
