@@ -16,11 +16,12 @@ The following are the commands to interact with the Acryl Datahub Catalog.
 ### Create a new dataset
 
 ```
-curl 'http://localhost:8080/entities?action=ingest' -X POST --data '{
+curl 'http://localhost:8080/entities?action=ingest' -X POST --data '
+{
    "entity":{
       "value":{
          "com.linkedin.metadata.snapshot.DatasetSnapshot":{
-            "urn":"urn:li:dataset:(urn:li:dataPlatform:fooe,Userx,PROD)",
+            "urn":"urn:li:dataset:(urn:li:dataPlatform:fooe,UserReferenceExample,PROD)",
             "aspects":[
                {
                   "com.linkedin.common.Ownership":{
@@ -58,7 +59,7 @@ curl 'http://localhost:8080/entities?action=ingest' -X POST --data '{
                  "com.linkedin.dataset.UpstreamLineage": {
                    "upstreams": [
                      {
-                       "dataset": "urn:li:dataset:(urn:li:dataPlatform:fooe,User,PROD)",
+                       "dataset": "urn:li:dataset:(urn:li:dataPlatform:kafka,user,PROD)",
                        "type": "TRANSFORMED"
                      }
                    ]
@@ -67,8 +68,7 @@ curl 'http://localhost:8080/entities?action=ingest' -X POST --data '{
                {
                   "com.linkedin.dataset.DatasetProperties":{
                       "customProperties": {
-                            "cracker": "something",
-                            "joker": "poker"
+                            "html_wrapper": "<b> | </b>"
                         },
                         "externalUrl": "noll",
                         "description": "Kaun User7 description",
@@ -90,6 +90,19 @@ curl 'http://localhost:8080/entities?action=ingest' -X POST --data '{
                            "documentSchema":"{\"type\":\"record\",\"namespace\":\"com.surveyfunky\",\"name\":\"User\",\"fields\":[{\"name\":\"user_id\",\"doc\":\"Uniqueidentifieroftheuser\"},{\"name\":\"first_name\",\"type\":\"string\",\"doc\":\"FirstNameofUser\"},{\"name\":\"last_name\",\"type\":\"string\",\"doc\":\"LastNameofUser\"},{\"name\":\"created_date\",\"type\":[\"null\",{\"type\":\"string\",\"logicalType\":\"date\"}],\"doc\":\"Dateonwhichthisrecordiscreated\"},{\"name\":\"last_updated_time\",\"type\":[\"null\",{\"type\":\"string\",\"logicalType\":\"timestamp-millis\"}],\"doc\":\"Timestampwhenthisrecordwasmostrecentlyupdated\"},{\"name\":\"last_login\",\"type\":[\"null\",{\"type\":\"string\",\"logicalType\":\"timestamp-millis\"}],\"doc\":\"Timestampofthelatesttimetheuserhasloggedin\"}]}"
                         }
                      },
+                     "primaryKeys": [
+                         "user_id"
+                     ],
+                     "foreignKeys":[{
+                        "name": "sample foreign key",
+                        "foreignFields": [
+                           "urn:li:schemaField:(urn:li:dataset:(urn:li:dataPlatform:kafka,user,PROD),user_id)"
+                         ],
+                         "sourceFields": [
+                           "urn:li:schemaField:(urn:li:dataset:(urn:li:dataPlatform:fooe,UserReferenceExample,PROD),user_id)"
+                         ],
+                         "foreignDataset": "urn:li:dataset:(urn:li:dataPlatform:kafka,user,PROD)"
+                     }],
                      "fields":[
                         {
                            "fieldPath":"user_id",

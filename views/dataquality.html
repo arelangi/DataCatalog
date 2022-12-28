@@ -4,7 +4,7 @@
 <head>
     <!-- <meta charset="utf-8"> -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Data Catalog Registration</title>
+    <title>Data Control Plane Registration</title>
     <meta name="description" content="Register new data sets">
     <!-- Pico.css -->
     <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
@@ -114,7 +114,7 @@
 
         <br/>
         <div class="grid">
-            <button id="addRow" style="width:15%" >Add new row</button>
+            <button id="addRow" style="width:15%" >Add new rule</button>
         </div>
         <table id="quality_tbl" class="display" role="grid">
                 <thead>
@@ -131,7 +131,7 @@
                 
 
                 </tbody>
-                </table>
+        </table>
                 <input id="datasetid"  type="hidden" name="datasetid" value="{{ .payload.DatasetID }}">
                 <button type="submit" id="dataqualityrules-btn">Submit</button>
             
@@ -156,9 +156,8 @@
 
     <!-- Footer -->
     <footer class="container">
-        <small></small><a href="#">Data Catalog</a> • <a href="#">Zendesk</a></small>
+        <small></small><a href="#">Data Control Plane</a>
     </footer><!-- ./ Footer -->
-
 
 </body>
 
