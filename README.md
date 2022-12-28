@@ -1,6 +1,16 @@
 # DataCatalog
 
 
+You  can run the catalog by running the following command
+
+`go run *.go`
+
+
+You can visit the site at `localhost:3000`
+
+
+### Ignore everything below
+
 Initiating the Datahub data catalog
 
 ```
