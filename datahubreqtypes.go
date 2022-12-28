@@ -69,6 +69,7 @@ type SchemaMetadataType struct {
 			DocumentSchema string `json:"documentSchema"`
 		} `json:"com.linkedin.schema.KafkaSchema"`
 	} `json:"platformSchema"`
+	PrimaryKeys []string `json:"primaryKeys,omitempty"`
 	Fields []DatahubFieldType `json:"fields,omitempty"`
 }
 

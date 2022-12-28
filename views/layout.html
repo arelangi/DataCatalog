@@ -1,0 +1,69 @@
+
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Preview • Pico.css</title>
+    <meta name="description" content="A starter example with all elements and components used in Pico design system. Built with Pico CSS.">
+    <link rel="shortcut icon" href="https://picocss.com/favicon.ico">
+    <link rel="canonical" href="https://picocss.com/examples/preview/">
+
+    <!-- Pico.css -->
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+
+    <style>
+        img{
+            width: 50%;
+        }
+    </style>
+
+  </head>
+
+
+  <body>
+
+
+    <!-- Main -->
+    <main class="container">
+
+      <!-- Preview -->
+      <section id="preview">        
+        <form>
+          <div class="grid">
+            <img src="img/developer.png">
+            <p>Raj is a software engineer on the Support product. He would like to publish data from Support for consumption by downstream consumers.  <br/><br/> He just learned about the Data Platform Control Plane that makes it easy to register the data, provision the infrastructure and publish the data.</p>
+          </div>
+          <br/>
+          <button type="submit">Follow Raj's journey on publishing the data</button>
+        </form>
+        <form>
+            <div class="grid">
+                <img src="img/datasteward.png">
+                <p><br/><br/> Jane is the data steward for Support. She is responsible for the quality of the data and the metadata published by the Support team. <br/><br/> Jane reviews the information provided by Raj to publish the data as part of the approval process. </p>
+                </div>
+            <br/>
+            <button type="submit">Follow Jane on data approval and provisioning</button>
+          </form>
+          <form>
+            <div class="grid">
+                <img src="img/analyst.png">
+                <p><br/><br/><br/> Alice is an analyst on the Analytics and Strategy team. She wants to analyze the Accounts data to look for trends in the recent sales promotions to share with her team.</p>
+                </div>
+            <br/>
+            <button type="submit">Follow Alice on her data consumer journey</button>
+          </form>
+      </section><!-- ./ Preview -->
+
+    <!-- Minimal theme switcher -->
+    <script src="../js/minimal-theme-switcher.js"></script>
+
+    <script>
+    // Set indeterminate progress bar
+    document.getElementById('progress-2').indeterminate = true;
+    </script>
+
+  </body>
+
+</html>
